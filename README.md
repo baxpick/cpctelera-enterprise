@@ -40,6 +40,7 @@ If you test it in any platform (listed here or not) and have problems, please fe
  * (C) Copyright 2014-2017 [CPCtelera's _awesome_ authors](http://lronaldo.github.io/cpctelera/files/authors-txt.html)
  * _**CPCtelera**_ low-level library, examples and scripts are distributed under [GNU Lesser General Public License v3](http://lronaldo.github.io/cpctelera/files/license-txt.html)
  * Content authoring tools included within _**CPCtelera**_ (under _cpctelera/tools_ folder) have their own licenses. Check each of them in their respective folders for more details.
+* Enterprise port of cpctelera is done by Geco
 
 [![Cheesetea Logo][CTLogo]](http://www.cheesetea.com) [![Fremos logo][FRLogo]](http://fremos.cheesetea.com)
 
