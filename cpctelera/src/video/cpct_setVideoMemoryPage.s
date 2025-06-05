@@ -16,7 +16,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;-------------------------------------------------------------------------------
 .module cpct_video
-
+ .include "../../CPCteleraHW.src" 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Function: cpct_setVideoMemoryPage
@@ -105,6 +105,7 @@
 ;; (end code)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+    .if HARDWARE_CPC 
 _cpct_setVideoMemoryPage::
 cpct_setVideoMemoryPage_asm::  ;; Assembly entry point
    ;; Select R12 Register from the CRTC and Write there the selected Video Memory Page
@@ -114,3 +115,112 @@ cpct_setVideoMemoryPage_asm::  ;; Assembly entry point
    out (c), l        ;; [4] Write Selected Video Memory Page to R12 (A to port 0xBD)
 
    ret               ;; [3] Return
+    .else
+   
+_cpct_setVideoMemoryPage::
+cpct_setVideoMemoryPage_asm::  ;; Assembly entry point
+        push    de
+        ld      a,l
+        rrca
+        rrca
+        rrca
+        rrca
+        and     #0x03
+        ld      c,a
+        ld      b,#0x00
+        ld      a,(bc)
+        cp      #0xfc
+        jp      c,#0x00a0
+        and     #0x03
+        rrca
+        rrca
+        ld      h,a
+        ld      a,l
+        and     #0x03
+        add     a,a
+        add     a,h
+        ld      h,a
+        ld      l,b
+        in      a,(#0xb3)
+        push    af
+        ld      a,#0xff
+        di
+        out     (#0xb3),a
+        ex      de,hl
+        ld      hl,(#0xc004)
+        ld      a,h
+        and     #0x01
+        ld      h,a
+        add     hl,de
+        ex      de,hl
+setaddr:
+        ld      hl,(#0xc006)   ;screen y, screen x
+        ld      a,l
+        add     a,a
+        ld      (scraddv1+1),a
+        ld      a,h
+        rrca
+        rrca
+        and     #0x1f
+        ld      c,a
+        ld      hl,#0xc004
+        ld      b,#0x00
+setadd: push    bc
+        ld      a,d
+        ld      d,#0x08
+        ld      c,#0x0f
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        and     #0xc7
+        ld      d,a
+        ex      de,hl
+scraddv1:
+        ld      c,#0x50
+        add     hl,bc
+        ex      de,hl
+        pop     bc
+        dec     c
+        jp      nz,setadd
+        pop     af
+        ei
+        out     (#0xb3),a
+        pop     de
+        ret
+    .endif

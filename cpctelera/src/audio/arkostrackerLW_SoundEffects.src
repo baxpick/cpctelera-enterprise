@@ -1,0 +1,593 @@
+;       Player of sound effects, for the Lightweight player.
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;
+   ;; Function: cpct_akpLW_SFXInit
+   ;;
+   ;;    Initializes sound effect instruments to be able to play sound effects.
+   ;;
+   ;; C Definition:
+   ;;    void <cpct_akpLW_SFXInit> (void* *sfx_song_data*)
+   ;;
+   ;; Input Parameters (2 bytes):
+   ;;  (2B DE) sfx_song_data - Pointer to the start of a song file containing instrument data for SFX
+   ;;
+   ;; Assembly call (Input parameters on registers):
+   ;;    > call cpct_akpLW_SFXInit_asm
+   ;;
+   ;; Known limitations:
+   ;;  * This function *will not work from ROM*, as it uses self-modifying code.
+   ;;
+   ;; Parameter Restrictions:
+   ;;    * *sfx_song_data* must be a song in binary AKS format. However, this song 
+   ;; only needs to have instruments defined (there is not need for an actual "song"
+   ;; as a list of notes, patterns and others). Instruments will be set up for 
+   ;; playing SFX later on with functions like <cpct_akp_SFXPlay>.
+   ;;
+   ;; Details:
+   ;;    This function initializes instruments that will be used later on to play 
+   ;; FX sounds at will using <cpct_akp_SFXPlay>. In order for the instruments to
+   ;; be initialized, *sfx_song_data* must point to a song defined in AKS format.
+   ;; For the purpose of this function, the song only requires to have instruments
+   ;; defined in it, as patterns, notes and other information is not used for FX
+   ;; sounds. 
+   ;;
+   ;;    You may use instruments from another song or a specific song containing
+   ;; instrument data only. Any song with instruments defined in it is valid to
+   ;; set up SFX with Arkos Tracker Player.
+   ;;
+   ;; Destroyed Register values: 
+   ;;    AF, DE, HL
+   ;;
+   ;; Required memory:
+   ;;
+   ;;    However, take into account that all of Arkos Tracker Player's
+   ;; functions are linked and included, because they depend on each other. Total
+   ;; memory requirement is around 2089 bytes.
+   ;;
+   ;; Time Measures:
+   ;; (start code)
+   ;;    Case    | Cycles | microSecs (us)
+   ;; --------------------------------
+   ;;    Any     |  146   |  36.50
+   ;; --------------------------------
+   ;; Asm saving |  -41   | -10.25
+   ;; -------------------------------
+   ;; (end code)
+   ;;
+   ;; Credits:
+   ;;    This is a modification of the original <Arkos Tracker Player at
+   ;; http://www.grimware.org/doku.php/documentations/software/arkos.tracker/start> 
+   ;; code from Targhan / Arkos. Madram / Overlander and Grim / Arkos have also 
+   ;; contributed to this source.
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+   PLY_SFX_Init:
+   _cpct_akpLW_SFXInit::
+      ld  hl, #2                                   ;; [10] Get Parameter from Stack
+      add hl, sp                                   ;; [11]
+      ld  e, (hl)                                  ;; [ 7]
+      inc hl                                       ;; [ 6]
+      ld  d, (hl)                                  ;; [ 7] HL = Pointer to the SFX "Song"
+      ex  de, hl
+
+   cpct_akpLW_SFXInit_asm::     ;; Entry point for assembly calls using registers for parameter passing
+
+;Initializes the sound effects. It MUST be called at any times before a first sound effect is triggered.
+;It doesn't matter whether the song is playing or not, or if it has been initialized or not.
+;IN:    HL = Address to the sound effects data.
+PLY_LW_InitSoundEffectsDisarkGenerateExternalLabel:
+PLY_LW_InitSoundEffects:
+        ld (PLY_LW_SE_PtSoundEffectTable + 1),hl
+        ret
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;
+   ;; Function: cpct_akpLW_SFXPlay
+   ;;
+   ;;    Plays a concrete sound effect, using the instruments of the "SFX song" 
+   ;; given to <cpct_akpLW_SFXInit> when initializing sound effects.
+   ;;
+   ;; C Definition:
+   ;;    void <cpct_akpLW_SFXPlay> (<u8> *sfx_num*, <u8> *channel_bitmask*, <u8> *volume*,)
+   ;;
+   ;; Input Parameters (3 bytes):
+   ;;  (1B A ) sfx_num         - Number of the instrument in the SFX Song (>0), same as the number given to the 
+   ;; instrument in Arkos Tracker.
+   ;;  (1B C ) channel
+   ;;  (1B B ) inv vol
+   ;;
+   ;; Assembly call (Input parameters on registers):
+   ;;    > call cpct_akpLW_SFXPlay_asm
+   ;;
+   ;; Known limitations:
+   ;;  * This function *will not work from ROM*, as it uses self-modifying code.
+   ;;
+   ;; Details:
+   ;;    Plays a given sound effect, along with the music, in a concrete channel 
+   ;; and with some parameters (Volume, Note, Speed, Inverted Pitch). This lets
+   ;; you create lots of different (and potentially complex) sound effects 
+   ;; from a set of instruments. In fact, you could play a song made of sound
+   ;; effect calls. 
+   ;;
+   ;; Destroyed Register values: 
+   ;;    AF, BC, DE, HL,
+   ;;
+   ;; Required memory:
+   ;;    95 bytes 
+   ;;
+   ;;    However, take into account that all of Arkos Tracker Player's
+   ;; functions are linked and included, because they depend on each other. Total
+   ;; memory requirement is around 2089 bytes.
+   ;;
+   ;; Time Measures:
+   ;; (start code)
+   ;;    Case    | Cycles  | microSecs (us)
+   ;; --------------------------------------
+   ;;    Any     |     To be done
+   ;; --------------------------------------
+   ;; Asm saving |  -141   |  -45.25
+   ;; --------------------------------------
+   ;; (end code)
+   ;;
+   ;; Credits:
+   ;;    This is a modification of the original <Arkos Tracker Player at
+   ;; http://www.grimware.org/doku.php/documentations/software/arkos.tracker/start> 
+   ;; code from Targhan / Arkos. Madram / Overlander and Grim / Arkos have also 
+   ;; contributed to this source.
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+   _cpct_akpLW_SFXPlay::
+   PLY_SFX_Play:
+      ld  hl, #2                                   ;; [10] Get Parameter from Stack
+      add hl, sp                                   ;; [11]
+      ld  a, (hl)                                  ;; [ 7] sfx
+      inc hl                                       ;; [ 6]
+      ld  c, (hl)                                  ;; [ 7] channel
+      inc hl                                       ;; [ 6]
+      ld  b, (hl)                                  ;; [ 7] vol
+
+      cpct_akpLW_SFXPlay_asm::     ;; Entry point for assembly calls using registers for parameter passing
+
+;Plays a sound effect. If a previous one was already playing on the same channel, it is replaced.
+;This does not actually plays the sound effect, but programs its playing.
+;The music player, when called, will call the PLY_LW_PlaySoundEffectsStream method below.
+;IN:    A = Sound effect number (>0!).
+;       C = The channel where to play the sound effect (0, 1, 2).
+;       B = Inverted volume (0 = full volume, 16 = no sound). Hardware sounds are also lowered.
+PLY_LW_PlaySoundEffectDisarkGenerateExternalLabel:
+PLY_LW_PlaySoundEffect:
+        ;Gets the address to the sound effect.
+        dec a                   ;The 0th is not encoded.
+dknr3:
+PLY_LW_SE_PtSoundEffectTable: ld hl,#0x000
+        ld e,a
+        ld d,#0x00
+        add hl,de
+        add hl,de
+        ld e,(hl)
+        inc hl
+        ld d,(hl)
+        ;Reads the header of the sound effect to get the speed.
+        ld a,(de)
+        inc de
+        ex af,af'
+
+        ld a,b
+
+        ;Finds the pointer to the sound effect of the desired channel.
+        ld hl,#PLY_LW_Channel1_SoundEffectData
+        ld b,#0x00
+        sla c
+        sla c
+        sla c
+        add hl,bc
+        ld (hl),e
+        inc hl
+        ld (hl),d
+        inc hl        
+        
+        ;Now stores the inverted volume.
+        ld (hl),a
+        inc hl
+        
+        ;Resets the current speed, stores the instrument speed.
+        ld (hl),#0x00
+        inc hl
+        ex af,af'
+        ld (hl),a
+        
+        ret
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;
+   ;; Function: cpct_akpLW_SFXStop
+   ;;
+   ;;    Stops the reproduction sound FX on given channels
+   ;;
+   ;; C Definition:
+   ;;    void <cpct_akpLW_SFXStop> (<u8> *stop_bitmask*)
+   ;;
+   ;; Input Parameters (1 byte):
+   ;;  (1B A) stop_bitmask - A value where the 3 Least Significant Bits represent which channels to stop 
+   ;; (bits enabled = channels to stop)
+   ;;
+   ;; Assembly call (Input parameters on registers):
+   ;;    > call cpct_akpLW_SFXStop_asm
+   ;;
+   ;; Known limitations:
+   ;;  * This function *will not work from ROM*, as it uses self-modifying code.
+   ;;
+   ;; Parameter Restrictions:
+   ;;    * *stop_bitmask* must be a value that operates as a set of enabled / 
+   ;; disabled bits (a bitmask). Concretely, the 3 Least Significant bits, 2, 1 
+   ;; and 0 (xxxxx210) refer to Channels C, B and A respectively. Rest of the 
+   ;; bits are ignored. Bits set to 1 mean that those channels will be stopped. 
+   ;; Bits set to 0 mean that those channels are to be left as they are.
+   ;;
+   ;; Details:
+   ;;    This function lets you selectively stop sound FX reproduction on one, two
+   ;; or the 3 available channels. A *stop_bitmask* is given as parameter containing
+   ;; the information about what channels shall be stopped.
+   ;;
+   ;; Destroyed Register values: 
+   ;;    AF, HL
+   ;;
+   ;; Required memory:
+   ;;    30 bytes 
+   ;;
+   ;;    However, take into account that all of Arkos Tracker Player's
+   ;; functions are linked and included, because they depend on each other. Total
+   ;; memory requirement is around 2082 bytes.
+   ;;
+   ;; Time Measures:
+   ;; (start code)
+   ;; Case       | Cycles | microSecs (us)
+   ;; --------------------------------
+   ;; Best (0)   |  101   |  25.25 
+   ;; --------------------------------
+   ;; Best (1)   |  149   |  37.25 
+   ;; --------------------------------
+   ;; Asm saving |  -28   |  -7.00
+   ;; --------------------------------
+   ;; (end code)
+   ;;
+   ;; Credits:
+   ;;    This is a modification of the original <Arkos Tracker Player at
+   ;; http://www.grimware.org/doku.php/documentations/software/arkos.tracker/start> 
+   ;; code from Targhan / Arkos. Madram / Overlander and Grim / Arkos have also 
+   ;; contributed to this source.
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+   _cpct_akpLW_SFXStop::
+   PLY_SFX_Stop:
+      ld   hl, #2                             ;; [10] Get Parameter from Stack
+      add  hl, sp                             ;; [11]
+      ld    a, (hl)                           ;; [ 7] A = Channel number to be stopped
+
+   cpct_akpLW_SFXStop_asm::     ;; Entry point for assembly calls using registers for parameter passing
+
+;Stops a sound effect. Nothing happens if there was no sound effect.
+;IN:    A = The channel where to stop the sound effect (0, 1, 2).
+PLY_LW_StopSoundEffectFromChannelDisarkGenerateExternalLabel:
+PLY_LW_StopSoundEffectFromChannel:
+        ;Puts 0 to the pointer of the sound effect.
+        add a,a
+        add a,a
+        add a,a
+        ld e,a
+        ld d,#0x00
+        ld hl,#PLY_LW_Channel1_SoundEffectData
+        add hl,de
+        ld (hl),d               ;0 means "no sound".
+        inc hl
+        ld (hl),d
+        ret
+
+;Plays the sound effects, if any has been triggered by the user.
+;This does not actually send registers to the PSG, it only overwrite the required values of the registers of the player.
+;The sound effects initialization method must have been called before!
+;As R7 is required, this must be called after the music has been played, but BEFORE the registers are sent to the PSG.
+;IN:    A = R7.
+PLY_LW_PlaySoundEffectsStream:
+        ;Shifts the R7 to the left twice, so that bit 2 and 5 only can be set for each track, below.
+        rla
+        rla
+
+        ;Plays the sound effects on every track.
+        ld ix,#PLY_LW_Channel1_SoundEffectData
+        ld iy,#PLY_LW_Track1_Registers
+        ld c,a
+        call PLY_LW_PSES_Play
+        ld ix,#PLY_LW_Channel2_SoundEffectData
+        ld iy,#PLY_LW_Track2_Registers
+        srl c                   ;Not RR, because we have to make sure the b6 is 0,.ELSE no more keyboard (on CPC)!
+                                ;Also, on MSX, bit 6 must be 0.
+        call PLY_LW_PSES_Play
+        ld ix,#PLY_LW_Channel3_SoundEffectData
+        ld iy,#PLY_LW_Track3_Registers
+       .IF PLY_LW_HARDWARE_MSX
+                scf             ;On MSX, bit 7 must be 1.
+                rr c
+       .ELSE
+                rr c            ;On other platforms, we don't care about b7.
+       .ENDIF
+        call PLY_LW_PSES_Play
+
+        ld a,c
+        ld (PLY_LW_MixerRegister),a
+        ret
+
+
+;Plays the sound stream from the given pointer to the sound effect. If 0, no sound is played.
+;The given R7 is given shift twice to the left, so that this code MUST set/reset the bit 2 (sound), and maybe reset bit 5 (noise).
+;This code MUST overwrite these bits because sound effects have priority over the music.
+;IN:    IX = Points on the sound effect pointer. If the sound effect pointer is 0, nothing must be played.
+;       IY = Points at the beginning of the register structure related to the channel.
+;       C = R7, shifted twice to the left.
+;OUT:   The pointed pointer by IX may be modified as the sound advances.
+;       C = R7, MUST be modified if there is a sound effect.
+PLY_LW_PSES_Play:
+        ;Reads the pointer pointed by IX.
+        ld l,0 (ix)
+        ld h,1 (ix)
+        ld a,l
+        or h
+        ret z           ;No sound to be played? Returns immediately.
+
+        ;Reads the first byte. What type of sound is it?
+PLY_LW_PSES_ReadFirstByte:
+        ld a,(hl)
+        inc hl
+        ld b,a
+        rra
+        jr c,PLY_LW_PSES_SoftwareOrSoftwareAndHardware
+        rra
+                       .IF PLY_CFG_SFX_HardOnly              ;CONFIG SPECIFIC
+        jr c,PLY_LW_PSES_HardwareOnly
+                       .ENDIF ;PLY_CFG_SFX_HardOnly
+
+        ;No software, no hardware, or end/loop.
+        ;-------------------------------------------
+        ;End or loop?
+        rra
+                       .IF PLY_CFG_SFX_NoSoftNoHard         ;CONFIG SPECIFIC. If not present, the jump is not needed, the method is just below.
+        jr c,PLY_LW_PSES_S_EndOrLoop
+                        
+        ;No software, no hardware.
+        ;-------------------------------------------
+        ;Gets the volume.
+        call PLY_LW_PSES_ManageVolumeFromA_Filter4Bits
+
+        ;Noise?
+                               .IF PLY_CFG_SFX_NoSoftNoHard_Noise                ;CONFIG SPECIFIC
+        rl b
+        call c,PLY_LW_PSES_ReadNoiseAndOpenNoiseChannel
+                               .ENDIF ;PLY_CFG_SFX_NoSoftNoHard_Noise
+
+        jr PLY_LW_PSES_SavePointerAndExit
+                       .ENDIF ;PLY_CFG_SFX_NoSoftNoHard
+
+        ;**Warning!** Do not put any instruction between EndOrLoop and NoSoftNoHard.
+
+PLY_LW_PSES_S_EndOrLoop:
+                       .IF PLY_CFG_SFX_LoopTo                ;CONFIG SPECIFIC. If no "loop to", the sounds always end, no need to test.
+        ;Is it an end?
+        rra
+        jr c,PLY_LW_PSES_S_Loop
+                       .ENDIF ;PLY_CFG_SFX_LoopTo
+        ;End of the sound. Marks the sound pointer with 0, meaning "no sound".
+        xor a
+        ld 0 (ix),a
+        ld 1 (ix),a
+        ret
+                       .IF PLY_CFG_SFX_LoopTo                ;CONFIG SPECIFIC.
+PLY_LW_PSES_S_Loop:
+        ;Loops. Reads the pointer and directly uses it.
+        ld a,(hl)
+        inc hl
+        ld h,(hl)
+        ld l,a
+        jr PLY_LW_PSES_ReadFirstByte
+                       .ENDIF ;PLY_CFG_SFX_LoopTo
+
+
+;Saves HL into IX, and exits. This must be called at the end of each Cell.
+;If the speed has not been reached, it is not saved.
+PLY_LW_PSES_SavePointerAndExit:
+        ;Speed reached?
+        ld a,PLY_LW_SoundEffectData_OffsetCurrentStep (ix)
+        cp PLY_LW_SoundEffectData_OffsetSpeed (ix)
+        jr c,PLY_LW_PSES_NotReached
+        ;The speed has been reached, so resets it and saves the pointer to the next cell to read.
+        ld PLY_LW_SoundEffectData_OffsetCurrentStep (ix),#0x00
+        ld 0 (ix),l
+        ld 1 (ix),h
+        ret
+PLY_LW_PSES_NotReached:
+        ;Speed not reached. Increases it, that's all. The same cell will be read next time.
+        inc PLY_LW_SoundEffectData_OffsetCurrentStep (ix)
+        ret
+
+                       .IF PLY_CFG_SFX_HardOnly         ;CONFIG SPECIFIC
+        ;Hardware only.
+        ;-------------------------------------------
+PLY_LW_PSES_HardwareOnly:
+        ;Calls the shared code that manages everything.
+        call PLY_LW_PSES_Shared_ReadRetrigHardwareEnvPeriodNoise
+        ;Cuts the sound.
+        set 2,c
+
+        jr PLY_LW_PSES_SavePointerAndExit
+                       .ENDIF ;PLY_CFG_SFX_HardOnly
+
+
+
+PLY_LW_PSES_SoftwareOrSoftwareAndHardware:
+        ;Software only?
+        rra
+                       .IF PLY_CFG_SFX_SoftAndHard         ;CONFIG SPECIFIC
+        jr c,PLY_LW_PSES_SoftwareAndHardware
+                       .ENDIF ;PLY_CFG_SFX_SoftAndHard
+
+        ;Software.
+        ;-------------------------------------------
+                       .IF PLY_CFG_SFX_SoftOnly          ;CONFIG SPECIFIC
+        ;Volume.
+        call PLY_LW_PSES_ManageVolumeFromA_Filter4Bits
+
+        ;Noise?
+        rl b
+                               .IF PLY_CFG_SFX_SoftOnly_Noise                ;CONFIG SPECIFIC
+        call c,PLY_LW_PSES_ReadNoiseAndOpenNoiseChannel
+                               .ENDIF ;PLY_CFG_SFX_SoftOnly_Noise
+
+        ;Opens the "sound" channel.
+        res 2,c
+
+        ;Reads the software period.
+        call PLY_LW_PSES_ReadSoftwarePeriod
+
+        jr PLY_LW_PSES_SavePointerAndExit
+                       .ENDIF ;PLY_CFG_SFX_SoftOnly
+
+
+        ;Software and Hardware.
+        ;-------------------------------------------
+                       .IF PLY_LW_SE_HardwareSounds         ;CONFIG SPECIFIC
+PLY_LW_PSES_SoftwareAndHardware:
+        ;Calls the shared code that manages everything.
+        call PLY_LW_PSES_Shared_ReadRetrigHardwareEnvPeriodNoise
+
+        ;Reads the software period.
+        call PLY_LW_PSES_ReadSoftwarePeriod
+
+        ;Opens the sound.
+        res 2,c
+
+        jr PLY_LW_PSES_SavePointerAndExit
+                       .ENDIF ;PLY_LW_SE_HardwareSounds
+
+
+                       .IF PLY_CFG_UseHardwareSounds         ;CONFIG SPECIFIC
+        ;Shared code used by the "hardware only" and "software and hardware" part.
+        ;Reads the Retrig flag, the Hardware Envelope, the possible noise, the hardware period,
+        ;and sets the volume to 16. The R7 sound channel is NOT modified.
+PLY_LW_PSES_Shared_ReadRetrigHardwareEnvPeriodNoise:
+        ;Retrig?
+        rra
+                               .IF PLY_LW_SE_Retrig                  ;CONFIG SPECIFIC
+        jr nc,PLY_LW_PSES_H_AfterRetrig
+        ld d,a
+        ld a,#0xff
+        ld (PLY_LW_SetReg13Old + 1),a
+        ld a,d
+PLY_LW_PSES_H_AfterRetrig:
+                               .ENDIF ;PLY_LW_SE_Retrig
+
+        ;The hardware envelope can be set (8-15).
+        and #0b111
+        add a,#0x08
+        ld (PLY_LW_SetReg13 + 1),a
+
+        ;Noise?
+                               .IF PLY_LW_SE_HardwareNoise           ;CONFIG SPECIFIC. B not needed after, we can put it in the condition too.
+        rl b
+        call c,PLY_LW_PSES_ReadNoiseAndOpenNoiseChannel
+                               .ENDIF ;PLY_LW_SE_HardwareNoise
+
+        ;Reads the hardware period.
+        call PLY_LW_PSES_ReadHardwarePeriod
+
+        ;Sets the volume to "hardware". It still may be decreased.
+        ld a,#0x10
+        jp PLY_LW_PSES_ManageVolumeFromA_Hard
+                       .ENDIF ;PLY_CFG_UseHardwareSounds
+
+
+                       .IF PLY_LW_SE_Noise
+;Reads the noise pointed by HL, increases HL, and opens the noise channel.
+PLY_LW_PSES_ReadNoiseAndOpenNoiseChannel:
+        ;Reads the noise.
+        ld a,(hl)
+        ld (PLY_LW_NoiseRegister),a
+        inc hl
+
+        ;Opens noise channel.
+        res 5,c
+        ret
+                       .ENDIF ;PLY_LW_SE_Noise
+
+                       .IF PLY_CFG_UseHardwareSounds         ;CONFIG SPECIFIC
+;Reads the hardware period from HL and sets the R11/R12 registers. HL is incremented of 2.
+PLY_LW_PSES_ReadHardwarePeriod:
+        ld a,(hl)
+        ld (PLY_LW_Reg11),a
+        inc hl
+        ld a,(hl)
+        ld (PLY_LW_Reg12),a
+        inc hl
+        ret
+                       .ENDIF ;PLY_CFG_UseHardwareSounds
+
+;Reads the software period from HL and sets the period registers thanks to IY. HL is incremented of 2.
+PLY_LW_PSES_ReadSoftwarePeriod:
+        ld a,(hl)
+        ld PLY_LW_Registers_OffsetSoftwarePeriodLSB (iy),a
+        inc hl
+        ld a,(hl)
+        ld PLY_LW_Registers_OffsetSoftwarePeriodMSB (iy),a
+        inc hl
+        ret
+
+                       .IF PLY_LW_SE_VolumeSoft      ;CONFIG SPECIFIC
+;Reads the volume in A, decreases it from the inverted volume of the channel, and sets the volume via IY.
+;IN:    A = volume, from 0 to 15 (no hardware envelope).
+PLY_LW_PSES_ManageVolumeFromA_Filter4Bits:
+        and #0b1111
+                       .ENDIF ;PLY_LW_SE_VolumeSoft
+                       .IF PLY_LW_SE_VolumeSoftOrHard        ;CONFIG SPECIFIC
+;After the filtering. Useful for hardware sound (volume has been forced to 16).
+PLY_LW_PSES_ManageVolumeFromA_Hard:
+        ;Decreases the volume, checks the limit.
+        sub PLY_LW_SoundEffectData_OffsetInvertedVolume (ix)
+        jr nc,PLY_LW_PSES_MVFA_NoOverflow
+        xor a
+PLY_LW_PSES_MVFA_NoOverflow:
+        ld PLY_LW_Registers_OffsetVolume (iy),a
+        ret
+                       .ENDIF ;PLY_LW_SE_VolumeSoftOrHard
+
+
+;The data of the Channels MUST be consecutive.
+PLY_LW_Channel1_SoundEffectData:
+;dkws
+       .dw 0                                            ;Points to the sound effect for the track 1, or 0 if not playing.
+PLY_LW_Channel1_SoundEffectInvertedVolume:
+;dkwe
+;dkbs
+       .db 0                                            ;Inverted volume.
+PLY_LW_Channel1_SoundEffectCurrentStep:
+       .db 0                                            ;Current step (>=0).
+PLY_LW_Channel1_SoundEffectSpeed:
+       .db 0                                            ;Speed (>=0).
+       .db 0,0,0                                        ;Padding.
+
+.equ PLY_LW_Channel_SoundEffectDataSize , . - PLY_LW_Channel1_SoundEffectData
+        
+;dkbs
+PLY_LW_Channel2_SoundEffectData:
+       .db 0,0,0,0,0,0,0,0          ;PLY_LW_Channel_SoundEffectDataSize
+PLY_LW_Channel3_SoundEffectData:
+       .db 0,0,0,0,0,0,0,0          ;PLY_LW_Channel_SoundEffectDataSize
+;dkbe
+
+;Offset from the beginning of the data, to reach the inverted volume.
+.equ PLY_LW_SoundEffectData_OffsetInvertedVolume     , PLY_LW_Channel1_SoundEffectInvertedVolume - PLY_LW_Channel1_SoundEffectData
+.equ PLY_LW_SoundEffectData_OffsetCurrentStep        , PLY_LW_Channel1_SoundEffectCurrentStep - PLY_LW_Channel1_SoundEffectData
+.equ PLY_LW_SoundEffectData_OffsetSpeed              , PLY_LW_Channel1_SoundEffectSpeed - PLY_LW_Channel1_SoundEffectData
+
+        ;;Checks that the pointers are consecutive.
+        ;assert (PLY_LW_Channel1_SoundEffectData + PLY_LW_Channel_SoundEffectDataSize) == PLY_LW_Channel2_SoundEffectData
+        ;assert (PLY_LW_Channel2_SoundEffectData + PLY_LW_Channel_SoundEffectDataSize) == PLY_LW_Channel3_SoundEffectData
+

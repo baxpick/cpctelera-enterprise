@@ -82,7 +82,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .globl cpct_drawCharM2_inner_asm
-
+ .include "../../CPCteleraHW.src"   
+     .if HARDWARE_CPC
    ;; Enable Lower ROM during char copy operation, with interrupts disabled 
    ;; to prevent firmware messing things up
    ld     a,(_cpct_mode_rom_status)  ;; [4] A = mode_rom_status (present value)
@@ -103,3 +104,18 @@ endDraw:
    ei                                ;; [1] Enable interrupts
 
    ret                               ;; [3] Return to caller
+    .else
+        in      a,(#0xb0)
+        push    af
+        ld      a,#0xff
+        di
+        out     (#0xb0),a
+        
+        ld     a, e                       ;; [1] A = ASCII Value of the character
+        call   cpct_drawCharM2_inner_asm  ;; [828/837] Does the actual drawing to screen
+        
+endDraw:
+        pop     af
+        ei
+        out     (#0xb0),a
+    .endif

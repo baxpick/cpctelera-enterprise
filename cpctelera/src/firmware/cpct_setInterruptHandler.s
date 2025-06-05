@@ -19,7 +19,7 @@
 .module cpct_firmware
 
 .include /firmware.s/
-
+.include "../../CPCteleraHW.src"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Function: cpct_setInterruptHandler
@@ -102,6 +102,7 @@ cpct_setInterruptHandler_asm::
 
    ret                                     ;; [3] Return
 
+.if HARDWARE_CPC
 ;;
 ;; Interrupt Handler Safe Wrapper Code. This is the code that
 ;; will be called at the start of the interrupt, and this code
@@ -128,3 +129,30 @@ cpct_safeInterruptHandlerCall:
    pop  af     ;; [3]
    ei          ;; [1] Reenable interrupts
    reti        ;; [4] Return to main program
+
+.else
+
+cpct_safeInterruptHandlerHook::
+   push af     ;; [4] Save all standard registers on the stack
+   push bc     ;; [4]
+   push de     ;; [4]
+   push hl     ;; [4]
+   push ix     ;; [5]
+   push iy     ;; [5]
+    .ifeq ENABLE_1000HZ_IRQ
+   ld   a,#0x30
+   out  (#0xb4),a
+    .endif
+cpct_safeInterruptHandlerCall:   
+   call #0000  ;; [5] Call Interrupt Handler
+
+   pop  iy     ;; [5] Restore all standard registers
+   pop  ix     ;; [5]
+   pop  hl     ;; [3]
+   pop  de     ;; [3]
+   pop  bc     ;; [3]
+   pop  af     ;; [3]
+   ei          ;; [1] Reenable interrupts
+   ret         ;; [3] Return to main program
+   
+.endif

@@ -1,0 +1,32 @@
+    .if HARDWARE_ENTERPRISE
+.equ PLY_UseEnterprise      ,   1     ;;Enteprise (1)/CPC (0)
+    .else
+.equ PLY_UseEnterprise      ,   0     ;;Enteprise (1)/CPC (0)
+    .endif
+
+;;------------------------------------------------------------------------------------------------------
+;;--- PLAYER CONFIGURATION CONSTANTS
+;;------------------------------------------------------------------------------------------------------
+
+;;
+;; Constants: Arkos Player Compilation Constants
+;;
+;;    Constants used to control which features are enabled / disabled in the Arkos Tracker
+;; Player code. Changing them requires recompiling CPCtelera's library to take effect.
+;;
+;;    PLY_UseSoundEffects - Set to 1 if you want to use Sound Effects in your player. 
+;; Both CPU and memory consuming. It is set to 1 by default in CPCtelera.
+;;    PLY_UseFades        - Set to 1 to allow fades in / out. A little CPU and memory 
+;; consuming. _cpct_akp_setFadeVolume becomes available.
+;;    PLY_SystemFriendly  - Set to 1 if you want to save the Registers used by AMSDOS 
+;; (AF', BC', IX, IY) which allows you to call this player in BASIC. As this option is 
+;; system-friendly, it cuts interruptions, and restores them ONLY IF NECESSARY. It is set
+;; to 0 by default. However, IX and IY registers are always saved.
+;;    PLY_RetrigValue     - Value used to trigger the Re-trig of Register 13. 0xFE 
+;; corresponds to 'CP xx'. Do not change it!
+;;
+.equ PLY_UseSoundEffects    ,   1
+.equ PLY_UseFades           ,   0
+.equ PLY_SystemFriendly     ,   0
+.equ PLY_RetrigValue        ,   #0xFE
+.equ PLY_UseFades           ,   0		;;Set to 1 to allow fades in/out. A little CPU and memory consuming.

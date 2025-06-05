@@ -1,0 +1,147 @@
+    .if HARDWARE_ENTERPRISE
+.equ PLY_AKM_HARDWARE_ENTERPRISE  , 1
+    .else
+.equ PLY_AKM_HARDWARE_ENTERPRISE  , 0
+    .endif
+    .if HARDWARE_CPC
+.equ PLY_AKM_HARDWARE_CPC         , 1
+    .else
+.equ PLY_AKM_HARDWARE_CPC         , 0
+    .endif
+
+.equ PLY_AKM_HARDWARE_MSX         , 0
+.equ PLY_AKM_HARDWARE_SPECTRUM    , 0
+.equ PLY_AKM_HARDWARE_PENTAGON    , 0
+
+.equ PLY_AKM_USE_HOOKS                       ,   1       ;Use hooks for external calls? 0 if the Init/Play methods are directly called, will save a few bytes.
+.equ PLY_AKM_STOP_SOUNDS                     ,   1       ;1 to have the "stop sounds" code. Set it to 0 if you never plan on stopping your music.
+
+.equ PLY_CFG_UseTranspositions               ,   1
+.equ PLY_CFG_UseSpeedTracks                  ,   1
+.equ PLY_CFG_UseEffects                      ,   1
+.equ PLY_CFG_UseHardwareSounds               ,   1
+.equ PLY_CFG_NoSoftNoHard_Noise              ,   1
+.equ PLY_CFG_SoftOnly_Noise                  ,   1
+.equ PLY_CFG_SoftOnly_SoftwarePitch          ,   1
+.equ PLY_CFG_SoftOnly_SoftwareArpeggio       ,   1
+.equ PLY_CFG_SoftToHard_SoftwarePitch        ,   1
+.equ PLY_CFG_SoftToHard_SoftwareArpeggio     ,   1
+.equ PLY_CFG_SoftAndHard_SoftwarePitch       ,   1
+.equ PLY_CFG_SoftAndHard_SoftwareArpeggio    ,   1
+.equ PLY_CFG_UseEffect_ArpeggioTable         ,   1
+.equ PLY_CFG_UseEffect_ForcePitchTableSpeed  ,   1
+.equ PLY_CFG_UseEffect_ForceArpeggioSpeed    ,   1
+.equ PLY_CFG_UseEffect_ForceInstrumentSpeed  ,   1
+.equ PLY_CFG_UseEffect_PitchUp               ,   1
+.equ PLY_CFG_UseEffect_PitchDown             ,   1
+.equ PLY_CFG_UseEffect_PitchTable            ,   1
+.equ PLY_CFG_UseEffect_SetVolume             ,   1
+.equ PLY_CFG_UseEffect_Reset                 ,   1
+
+.equ PLY_AKM_MANAGE_SOUND_EFFECTS            ,   1
+
+;PLY_CFG_UseHardwareSounds               ,   1
+.equ PLY_CFG_SFX_LoopTo                      ,   1
+.equ PLY_CFG_SFX_NoSoftNoHard                ,   1
+.equ PLY_CFG_SFX_NoSoftNoHard_Noise          ,   1
+.equ PLY_CFG_SFX_SoftOnly                    ,   1
+.equ PLY_CFG_SFX_SoftOnly_Noise              ,   1
+.equ PLY_CFG_SFX_HardOnly                    ,   1
+.equ PLY_CFG_SFX_HardOnly_Noise              ,   1
+.equ PLY_CFG_SFX_HardOnly_Retrig             ,   1
+.equ PLY_CFG_SFX_SoftAndHard                 ,   1
+.equ PLY_CFG_SFX_SoftAndHard_Noise           ,   1
+.equ PLY_CFG_SFX_SoftAndHard_Retrig          ,   1
+
+        ;Agglomerates some flags, because they are treated the same way by this player.
+        ;--------------------------------------------------
+        ;Creates a flag for pitch in instrument, and also pitch in hardware.
+       .if PLY_CFG_SoftOnly_SoftwarePitch + PLY_CFG_SoftToHard_SoftwarePitch + PLY_CFG_SoftAndHard_SoftwarePitch
+.equ PLY_AKM_PitchInInstrument , 1
+       .else
+.equ PLY_AKM_PitchInInstrument , 0
+       .endif
+       .if PLY_CFG_SoftToHard_SoftwarePitch + PLY_CFG_SoftAndHard_SoftwarePitch
+.equ PLY_AKM_PitchInHardwareInstrument , 1
+       .else
+.equ PLY_AKM_PitchInHardwareInstrument , 0
+       .endif
+        ;A flag for Arpeggios in Instrument, both in software and hardware.
+       .if PLY_CFG_SoftOnly_SoftwareArpeggio + PLY_CFG_SoftToHard_SoftwareArpeggio + PLY_CFG_SoftAndHard_SoftwareArpeggio
+.equ PLY_AKM_ArpeggioInSoftwareOrHardwareInstrument , 1
+       .else
+.equ PLY_AKM_ArpeggioInSoftwareOrHardwareInstrument , 0
+       .endif
+       .if PLY_CFG_SoftToHard_SoftwareArpeggio + PLY_CFG_SoftAndHard_SoftwareArpeggio
+.equ PLY_AKM_ArpeggioInHardwareInstrument , 1
+       .else
+.equ PLY_AKM_ArpeggioInHardwareInstrument , 0
+       .endif
+
+        ;A flag if noise is used (noise in hardware not tested, not present in this format).
+       .if PLY_CFG_NoSoftNoHard_Noise + PLY_CFG_SoftOnly_Noise
+.equ PLY_AKM_USE_Noise , 1
+       .else
+.equ PLY_AKM_USE_Noise , 0
+       .endif
+        
+        ;Mixing Pitch up/down effects.
+       .if PLY_CFG_UseEffect_PitchUp + PLY_CFG_UseEffect_PitchDown
+.equ PLY_AKM_USE_EffectPitchUpDown , 1
+       .else
+.equ PLY_AKM_USE_EffectPitchUpDown , 0
+       .endif
+        
+        ;If the Force Arpeggio Speed if used, it means the ArpeggioTable effect must also be!
+       .if PLY_CFG_UseEffect_ForceArpeggioSpeed 
+        .ifeq PLY_CFG_UseEffect_ArpeggioTable
+            FAIL "please set: PLY_CFG_UseEffect_ArpeggioTable , 1"
+        .endif
+       .endif
+        ;If the Force Pitch Table Speed if used, it means the PitchTable effect must also be!
+       .if PLY_CFG_UseEffect_ForcePitchTableSpeed 
+        .ifeq PLY_CFG_UseEffect_PitchTable
+            FAIL "please set: PLY_CFG_UseEffect_PitchTable , 1"
+        .endif
+       .endif 
+        
+       .if PLY_CFG_SFX_HardOnly + PLY_CFG_SFX_SoftAndHard
+.equ PLY_AKM_SE_HardwareSounds , 1
+       .else
+.equ PLY_AKM_SE_HardwareSounds , 0
+       .endif
+;       Mixes the Hardware Noise flags into one.
+       .if PLY_CFG_SFX_HardOnly_Noise + PLY_CFG_SFX_SoftAndHard_Noise
+.equ PLY_AKM_SE_HardwareNoise , 1
+       .else
+.equ PLY_AKM_SE_HardwareNoise , 0
+       .endif
+;       Mixes the Noise flags into one.
+       .if PLY_AKM_SE_HardwareNoise + PLY_CFG_SFX_NoSoftNoHard_Noise + PLY_CFG_SFX_SoftOnly
+.equ PLY_AKM_SE_Noise , 1
+       .else
+.equ PLY_AKM_SE_Noise , 0
+       .endif
+;       Mixes the Software Volume flags into one.
+       .if PLY_CFG_SFX_NoSoftNoHard + PLY_CFG_SFX_SoftOnly
+.equ PLY_AKM_SE_VolumeSoft , 1
+       .else
+.equ PLY_AKM_SE_VolumeSoft , 0
+       .endif
+       .if PLY_CFG_SFX_NoSoftNoHard + PLY_CFG_SFX_SoftOnly + PLY_CFG_UseHardwareSounds
+.equ PLY_AKM_SE_VolumeSoftOrHard , 1
+       .else
+.equ PLY_AKM_SE_VolumeSoftOrHard , 0
+       .endif
+;       Mixes the retrig flags into one.
+       .if PLY_CFG_SFX_HardOnly_Retrig + PLY_CFG_SFX_SoftAndHard_Retrig
+.equ PLY_AKM_SE_Retrig , 1
+       .else
+.equ PLY_AKM_SE_Retrig , 0
+       .endif
+
+       .if PLY_AKM_USE_Noise + PLY_AKM_SE_Noise
+.equ PLY_AKM_USE_NoiseRegister , 1
+       .else
+.equ PLY_AKM_USE_NoiseRegister , 0
+       .endif

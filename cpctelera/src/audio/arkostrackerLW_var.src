@@ -1,0 +1,98 @@
+    .if HARDWARE_ENTERPRISE
+.equ PLY_LW_HARDWARE_ENTERPRISE  , 1
+    .else
+.equ PLY_LW_HARDWARE_ENTERPRISE  , 0
+    .endif
+    .if HARDWARE_CPC
+.equ PLY_LW_HARDWARE_CPC         , 1
+    .else
+.equ PLY_LW_HARDWARE_CPC         , 0
+    .endif
+
+.equ PLY_LW_HARDWARE_MSX        , 0
+.equ PLY_LW_HARDWARE_SPECTRUM   , 0
+.equ PLY_LW_HARDWARE_PENTAGON   , 0
+
+;;------------------------------------------------------------------------------------------------------
+;;--- PLAYER CONFIGURATION CONSTANTS
+;;------------------------------------------------------------------------------------------------------
+.equ PLY_LW_USE_HOOKS           , 1         ;Use hooks for external calls? 0 if the Init/Play methods are directly called, will save a few bytes.
+.equ PLY_LW_STOP_SOUNDS         , 1         ;1 to have the "stop sounds" code. Set it to 0 if you never plan on stopping your music.
+
+.equ PLY_CFG_UseTranspositions              ,   1
+.equ PLY_CFG_UseSpeedTracks                 ,   1
+.equ PLY_CFG_UseEffects                     ,   1
+.equ PLY_CFG_UseHardwareSounds              ,   1
+.equ PLY_CFG_NoSoftNoHard_Noise             ,   1
+.equ PLY_CFG_SoftOnly_Noise                 ,   1
+.equ PLY_CFG_SoftOnly_SoftwareArpeggio      ,   1
+.equ PLY_CFG_SoftOnly_SoftwarePitch         ,   1
+.equ PLY_CFG_SoftToHard_SoftwarePitch       ,   1
+.equ PLY_CFG_SoftToHard_SoftwareArpeggio    ,   1
+.equ PLY_CFG_SoftAndHard_SoftwarePitch      ,   1
+.equ PLY_CFG_SoftAndHard_SoftwareArpeggio   ,   1
+.equ PLY_CFG_UseEffect_ArpeggioTable        ,   1
+.equ PLY_CFG_UseEffect_PitchTable           ,   1
+.equ PLY_CFG_UseEffect_PitchUp              ,   1
+.equ PLY_CFG_UseEffect_PitchDown            ,   1
+.equ PLY_CFG_UseEffect_SetVolume            ,   1
+.equ PLY_CFG_UseEffect_Reset                ,   1
+
+.equ PLY_LW_MANAGE_SOUND_EFFECTS            ,   1
+
+;PLY_CFG_UseHardwareSounds                   =  1
+.equ PLY_CFG_SFX_LoopTo                     ,   1
+.equ PLY_CFG_SFX_NoSoftNoHard               ,   1
+.equ PLY_CFG_SFX_NoSoftNoHard_Noise         ,   1
+.equ PLY_CFG_SFX_SoftOnly                   ,   1
+.equ PLY_CFG_SFX_SoftOnly_Noise             ,   1
+.equ PLY_CFG_SFX_HardOnly                   ,   1
+.equ PLY_CFG_SFX_HardOnly_Noise             ,   1
+.equ PLY_CFG_SFX_HardOnly_Retrig            ,   1
+.equ PLY_CFG_SFX_SoftAndHard                ,   1
+.equ PLY_CFG_SFX_SoftAndHard_Noise          ,   1
+.equ PLY_CFG_SFX_SoftAndHard_Retrig         ,   1
+
+;       Agglomerates some Player Configuration flags.
+;       --------------------------------------------
+;       Mixes the Hardware flags into one.
+       .IF PLY_CFG_SFX_HardOnly + PLY_CFG_SFX_SoftAndHard
+.equ PLY_LW_SE_HardwareSounds , 1
+       .else
+.equ PLY_LW_SE_HardwareSounds , 0
+       .ENDIF
+;       Mixes the Hardware Noise flags into one.
+       .IF PLY_CFG_SFX_HardOnly_Noise + PLY_CFG_SFX_SoftAndHard_Noise
+.equ PLY_LW_SE_HardwareNoise , 1
+       .else
+.equ PLY_LW_SE_HardwareNoise , 0        
+       .ENDIF
+;       Mixes the Noise flags into one.
+       .IF PLY_LW_SE_HardwareNoise + PLY_CFG_SFX_NoSoftNoHard_Noise + PLY_CFG_SFX_SoftOnly
+.equ PLY_LW_SE_Noise , 1
+       .else
+.equ PLY_LW_SE_Noise , 0
+       .ENDIF
+;       Noise in Sound Effects? Then noise register code must be compiled.
+       .IF PLY_LW_SE_Noise * PLY_LW_MANAGE_SOUND_EFFECTS
+.equ PLY_LW_USE_NoiseRegisterS , 1
+       .else
+.equ PLY_LW_USE_NoiseRegisterS , 0
+       .ENDIF
+;       Mixes the Software Volume flags into one.
+       .IF PLY_CFG_SFX_NoSoftNoHard + PLY_CFG_SFX_SoftOnly + PLY_CFG_UseHardwareSounds
+.equ PLY_LW_SE_VolumeSoftOrHard , 1
+       .else
+.equ PLY_LW_SE_VolumeSoftOrHard , 0
+       .ENDIF
+       .IF PLY_CFG_SFX_NoSoftNoHard + PLY_CFG_SFX_SoftOnly
+.equ PLY_LW_SE_VolumeSoft , 1
+       .else
+.equ PLY_LW_SE_VolumeSoft , 0
+       .ENDIF
+;       Mixes the retrig flags into one.
+       .IF PLY_CFG_SFX_HardOnly_Retrig + PLY_CFG_SFX_SoftAndHard_Retrig
+.equ PLY_LW_SE_Retrig , 1
+       .else
+.equ PLY_LW_SE_Retrig , 0
+       .ENDIF

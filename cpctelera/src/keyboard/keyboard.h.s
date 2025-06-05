@@ -16,7 +16,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;-------------------------------------------------------------------------------
 .module cpct_keyboard
-
+ .include "../CPCteleraHW.src"
 ;;
 ;; Constant: Key Definitions (asm)
 ;;
@@ -72,7 +72,7 @@
 ;;  Table 1. KeyCodes defined for each possible key, ordered by KeyCode
 ;; (end)
 ;;
-
+    .if HARDWARE_CPC 
 ;; Matrix Line 0x00
 Key_CursorUp     = #0x0100  ;; Bit 0 (01h) => | 0000 0001 |
 Key_CursorRight  = #0x0200  ;; Bit 1 (02h) => | 0000 0010 |
@@ -170,3 +170,98 @@ Joy0_Fire1       = #0x1009
 Joy0_Fire2       = #0x2009
 Joy0_Fire3       = #0x4009
 Key_Del          = #0x8009
+
+    .else
+;; Matrix Line 0x00
+Key_N            = #0x0100  ;; Bit 0 (01h) => | 0000 0001 |
+Key_BackSlash    = #0x0200  ;; Bit 1 (02h) => | 0000 0010 |
+Key_B            = #0x0400  ;; Bit 2 (04h) => | 0000 0100 |
+Key_C            = #0x0800  ;; Bit 3 (08h) => | 0000 1000 |
+Key_V            = #0x1000  ;; Bit 4 (10h) => | 0001 0000 |
+Key_X            = #0x2000  ;; Bit 5 (20h) => | 0010 0000 |
+Key_Z            = #0x4000  ;; Bit 6 (40h) => | 0100 0000 |
+Joy0_Fire1       = #0x8000  ;; Bit 7 (80h) => | 1000 0000 |
+;; Matrix Line 0x01
+Key_H            = #0x0101
+Key_CapsLock     = #0x0201
+Key_G            = #0x0401
+Key_D            = #0x0801
+Key_F            = #0x1001
+Key_S            = #0x2001
+Key_A            = #0x4001
+Joy0_Up          = #0x8001
+;; Matrix Line 0x02
+Key_U            = #0x0102		        
+Key_Q            = #0x0202      
+Key_Y            = #0x0402     
+Key_R            = #0x0802      
+Key_T            = #0x1002
+Key_E            = #0x2002             
+Key_W            = #0x4002
+Key_Tab          = #0x8002
+Joy0_Down        = #0x8002		
+;; Matrix Line 0x03
+Key_7            = #0x0103		     
+Key_1            = #0x0203        
+Key_6            = #0x0403                
+Key_4            = #0x0803
+Key_5            = #0x1003         
+Key_3            = #0x2003             
+Key_2            = #0x4003             
+Joy0_Left        = #0x8003		
+;; Matrix Line 0x04
+Key_F4           = #0x0104
+Key_F8           = #0x0204
+Key_F3           = #0x0404
+Key_F6           = #0x0804
+Key_F5           = #0x1004
+Key_F7           = #0x2004
+Key_F2           = #0x4004
+Key_F1           = #0x8004		
+Joy0_Right       = #0x8004		
+;; Matrix Line 0x05
+Key_8            = #0x0105
+Key_Un1          = #0x0205
+Key_9            = #0x0405
+Key_Hyphen       = #0x0805
+Key_0            = #0x1005
+Key_Caret        = #0x2005
+Key_Del          = #0x4005
+Joy1_Fire        = #0x8005		
+;; Matrix Line 0x06
+Key_J            = #0x0106
+Key_Un2          = #0x0206
+Key_K            = #0x0406
+Key_SemiColon    = #0x0806
+Key_L            = #0x1006
+Key_Colon        = #0x2006
+Key_OpenBracket  = #0x4006
+Joy1_Up          = #0x8006
+;; Matrix Line 0x07
+Key_Esc          = #0x0107
+Key_CursorDown   = #0x0207
+Key_CursorRight  = #0x0407
+Key_CursorUp     = #0x0807
+Key_Control      = #0x1007
+Key_CursorLeft   = #0x2007
+Key_Enter        = #0x4007
+Joy1_Down        = #0x8007
+;; Matrix Line 0x08
+Key_M            = #0x0108
+Key_Clr          = #0x0208
+Key_Comma        = #0x0408
+Key_Slash        = #0x0808
+Key_Dot          = #0x1008
+Key_Shift        = #0x2008
+Key_Space        = #0x4008
+Joy1_Left        = #0x8008
+;; Matrix Line 0x09
+Key_I            = #0x0109
+Key_Un3          = #0x0209
+Key_O            = #0x0409
+Key_At           = #0x0809
+Key_P            = #0x1009
+Key_CloseBracket = #0x2009
+Key_Un4          = #0x4009
+Joy1_Right       = #0x8009		
+    .endif

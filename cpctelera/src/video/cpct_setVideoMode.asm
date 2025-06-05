@@ -22,7 +22,7 @@
 ;#####################################################################
 ;
 .module cpct_video
-   
+ .include "../../CPCteleraHW.src"   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Function: cpct_setVideoMode
 ;;
@@ -83,6 +83,7 @@
 ;; cpcrslib by Raul Simarro.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+    .if HARDWARE_CPC
    ld   hl, #_cpct_mode_rom_status ;; [3] HL points to present MODE, INT.GEN and ROM selection byte.
    ld    a, (hl)                   ;; [2] A = Present values for MODE, INT.GEN and ROM selection. (See mode_rom_status)
    and #0xFC                       ;; [2] A = (xxxxxx00) set bits 1,0 to 0, to prepare them for inserting the mode parameter
@@ -92,4 +93,42 @@
 
    ld (hl), a                      ;; [2] Save new Mode and ROM status for later use if required
 
-   ret                             ;; [3] Return
+   ret                             ;; [3] Return 
+    .else
+
+        di
+        in      a,(#0xb3)
+        push    af
+        ld      a,#0xff
+        out     (#0xb3),a
+        ld      a,#0x02
+        sub     l
+        rrca
+        rrca
+        rrca
+        add     a,#0x12
+        push    de
+        ld      hl,#0xc001
+        xor     (hl)
+        and     #0x7f
+        ld      c,a
+        ld      a,(#0xc007)   ;screen y
+        ld      b,a
+        ;ld      b,#0x64
+        ld      de,#0x0010
+fillcol1:
+        ld      a,(hl)
+        xor     c
+        ld      (hl),a
+        add     hl,de
+        ld      a,(hl)
+        xor     c
+        ld      (hl),a
+        add     hl,de
+        djnz    fillcol1
+        pop     de
+        pop     af
+        out     (#0xb3),a                           ;; .... (INKR + INK to be set for selected PEN number)
+        ei
+        ret                     ;; [3] Return
+    .endif

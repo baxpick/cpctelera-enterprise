@@ -27,7 +27,7 @@
 ;; Include constants and general values
 ;;
 .include /strings.s/
-
+ .include "../../CPCteleraHW.src"   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Function: cpct_drawCharM1_f
@@ -379,6 +379,7 @@ dcm1f_fg11:
 
    ;; Make HL point to the starting byte of the desired character,
    ;; That is ==> HL = 8*(ASCII code) + char0_ROM_address 
+    .if HARDWARE_CPC
 dcm1f_asciiHL:
    xor   a                     ;; [ 4] A = 0
    or    #0                    ;; [ 7] A = ASCII Value and Resetting carry flag (#0 is a placeholder 
@@ -401,7 +402,21 @@ dcm1f_asciiHL:
    ld    b, #GA_port_byte      ;; [ 7] B = Gate Array Port (0x7F)
    di                          ;; [ 4] Disable interrupts to prevent firmware from taking control while Lower ROM is enabled
    out (c), a                  ;; [12] GA Command: Set Video Mode and ROM status (100)
-
+    .else
+.include "macros/cpct_undocumentedOpcodes.h.s"
+        in      a,(#0xb0)
+        push    af
+        ld      a,#0xff
+        di
+        out     (#0xb0),a 
+        ld      hl,(#0x0016) 
+dcm1f_asciiHL:
+        ld      a,l
+        or      #0x00
+        ld      l,a
+        push    iy
+        ld__iyh    #0x08 
+    .endif
    ;;
    ;; Transform character definition into colour values for video memory and copy
    ;; them to the video position given at DE. Each character definition has 8 pixel-lines (8 bytes)
@@ -474,6 +489,7 @@ dcm1f_end_b2bg:
    or    b                     ;; [ 4] Mix background and foreground colour values into A
    ld (de), a                  ;; [ 7] Store final calculated colour values into present video memory byte
 
+    .if HARDWARE_CPC
    ;; We have finished with this pixel-line, check if there are
    ;; more pixel-lines to continue or end drawing
    inc   l                     ;; [ 4] Next pixel Line (characters are 8-byte-aligned in memory, 
@@ -481,6 +497,11 @@ dcm1f_end_b2bg:
    ld    a, l                  ;; [ 4] IF next pixel line corresponds to a new character 
                                ;; .... (this is, we have finished drawing our character),
    and   #0x07                 ;; [ 7] ... then L % 8 == 0, as it is 8-byte-aligned. 
+    .else
+        ld      bc,#0x0080
+        add     hl,de
+        dec__iyh
+    .endif
    jp    z, dcm1f_end_printing ;; [10] IF L%8 = 0, we have finished drawing the character, else, proceed to next line
 
    ;; Prepare to copy next line 
@@ -502,10 +523,16 @@ dcm1f_8bit_boundary_crossed:
    jp  dcm1f_nextPixelLine     ;; [10] Jump to continue with next pixel line
 
 dcm1f_end_printing:
+    .if HARDWARE_CPC
    ;; After finishing character printing, restore previous ROM and Interrupts status
    ld    a, (_cpct_mode_rom_status);; [13] A = mode_rom_status (present saved value)
    ld    b, #GA_port_byte      ;; [ 7] B = Gate Array Port (0x7F)
    out (c), a                  ;; [12] GA Command: Set Video Mode and ROM status (100)
    ei                          ;; [ 4] Enable interrupts
-
+    .else
+        pop     iy
+        pop     af
+        ei
+        out     (#0xb0),a 
+    .endif
    ret                         ;; [10] Return

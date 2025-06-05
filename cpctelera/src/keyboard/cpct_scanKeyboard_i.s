@@ -16,7 +16,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;-------------------------------------------------------------------------------
 .module cpct_keyboard
-
+ .include "../../CPCteleraHW.src"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Function: cpct_scanKeyboard_i
@@ -80,6 +80,7 @@
 ;; excluding the 3 microseconds from the ret instruction)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+    .if HARDWARE_CPC
 ;; Keyboard Status Buffer defined in an external file
 .globl _cpct_keyboardStatusBuffer
 
@@ -130,4 +131,30 @@ rfks_nextKeyboardLine:
    ld   bc, #0xF782         ;; [3] Put again PPI in Output/Output mode for Ports A/C.
    out (c), c               ;; [4]
 
+   ret                      ;; [3] Return 
+    .else
+
+;; Keyboard Status Buffer defined in an external file
+.globl _cpct_keyboardStatusBuffer
+
+_cpct_scanKeyboard_i:: 
+cpct_scanKeyboard_i_asm::     ;; Assembly entry point
+
+   ld   hl, #_cpct_keyboardStatusBuffer ;; [3] HL Points to the start of the keyboardBuffer, 
+   ld   b,#0x0a
+read_keyb:
+   ld   a,#0x0a
+   sub  b
+   out  (#0xb5),a
+   in   a,(#0xb5)
+   ld   (hl),a
+   in   a,(#0xb6)
+   rrca
+   jr   c,nojoy
+   res  7,(hl)
+nojoy:
+   inc  hl
+   djnz read_keyb
+
    ret                      ;; [3] Return
+    .endif

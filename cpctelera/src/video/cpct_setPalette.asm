@@ -16,7 +16,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;-------------------------------------------------------------------------------
 .module cpct_video
-
+ .include "../../CPCteleraHW.src"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Function: cpct_setPalette
 ;;
@@ -131,6 +131,7 @@
 ;;
 ;; http://www.grimware.org/doku.php/documentations/devices/gatearray
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    .if HARDWARE_CPC
 
    dec   e                  ;; [1] E = number of colours - 1 = Palette index of the last colour to be set 
    add  hl, de              ;; [3] HL += DE (HL Points to the end of the palette array)
@@ -151,4 +152,53 @@ svp_setPens_loop:
    dec   e                  ;; [1] E -= 1, Next Palette index to be set (counting backwards)
    jp    p, svp_setPens_loop;; [3] If more than 0 PENs to be set, continue
 
-   ret                      ;; [3] Return
+   ret                      ;; [3] Return 
+    .else
+
+        ld    a,e
+        cp    #0x0a
+        jr    c,palvalok
+        ld    a,#0x09
+palvalok:
+        ld    c,a
+        di
+        in    a,(#0xb3)
+        push  af
+        ld    a,#0xff
+        out   (#0xb3),a
+        ex    de,hl
+        ld    hl,#0xc008
+fillpal:
+        ld      a,(#0xc007)   ;screen y
+        ld      b,a
+        ld    a,(de)
+        push  de
+        push  hl
+;        ld    b,#0x64
+        ld    de,#0x0010
+fillcol1:
+        ld    (hl),a
+        add   hl,de
+        ld    (hl),a
+        add   hl,de
+        djnz  fillcol1
+        pop   hl
+        pop   de
+        inc   l
+        inc   de
+        bit   4,l
+        jr    nz,bias
+        dec   c
+        jr    nz,fillpal
+        jr    nobias
+bias:
+        dec   c
+        jr    z,nobias
+        ld    a,(de)
+        out   (#0x80),a
+nobias:
+        pop   af
+        out   (#0xb3),a
+        ei
+        ret                      ;; [3] Return
+    .endif

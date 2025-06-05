@@ -1,0 +1,55 @@
+    .if HARDWARE_ENTERPRISE
+.equ PLY_AKY_HARDWARE_ENTERPRISE  , 1
+    .else
+.equ PLY_AKY_HARDWARE_ENTERPRISE  , 0
+    .endif
+    .if HARDWARE_CPC
+.equ PLY_AKY_HARDWARE_CPC         , 1
+    .else
+.equ PLY_AKY_HARDWARE_CPC         , 0
+    .endif
+
+.equ PLY_AKY_HARDWARE_MSX         , 0
+.equ PLY_AKY_HARDWARE_SPECTRUM    , 0
+.equ PLY_AKY_HARDWARE_PENTAGON    , 0
+
+.equ PLY_AKY_UseHooks            ,   1       ;Use hooks for external calls? 0 if the Init/Play methods are directly called, will save a few bytes.
+
+.equ PLY_CFG_UseHardwareSounds   ,   1
+.equ PLY_CFG_UseRetrig           ,   1
+.equ PLY_CFG_NoSoftNoHard        ,   1
+.equ PLY_CFG_NoSoftNoHard_Noise  ,   1
+.equ PLY_CFG_SoftOnly            ,   1
+.equ PLY_CFG_SoftOnly_Noise      ,   1
+.equ PLY_CFG_SoftToHard          ,   1
+.equ PLY_CFG_SoftToHard_Noise    ,   1
+.equ PLY_CFG_SoftToHard_Retrig   ,   1
+.equ PLY_CFG_HardOnly            ,   1
+.equ PLY_CFG_HardToSoft          ,   1
+.equ PLY_CFG_HardToSoft_Noise    ,   1
+.equ PLY_CFG_HardOnly_Noise      ,   1
+.equ PLY_CFG_HardOnly_Retrig     ,   1
+.equ PLY_CFG_SoftAndHard         ,   1
+.equ PLY_CFG_SoftAndHard_Noise   ,   1
+.equ PLY_CFG_SoftAndHard_Retrig  ,   1
+
+        ;Agglomerates the hardware sound configuration flags, because they are treated the same in this player.
+        ;-------------------------------------------------------
+        .IF PLY_CFG_SoftToHard + PLY_CFG_SoftAndHard + PLY_CFG_HardToSoft
+.equ PLY_AKY_USE_SoftAndHard_Agglomerated , 1
+        .else
+.equ PLY_AKY_USE_SoftAndHard_Agglomerated , 0
+        .ENDIF
+        
+        .IF PLY_CFG_SoftToHard_Noise + PLY_CFG_SoftAndHard_Noise + PLY_CFG_HardToSoft_Noise
+.equ PLY_AKY_USE_SoftAndHard_Noise_Agglomerated , 1
+        .else
+.equ PLY_AKY_USE_SoftAndHard_Noise_Agglomerated , 0
+        .ENDIF
+        
+        ;Any noise?
+        .IF PLY_AKY_USE_SoftAndHard_Noise_Agglomerated + PLY_CFG_NoSoftNoHard_Noise + PLY_CFG_SoftOnly_Noise
+.equ PLY_AKY_USE_Noise , 1
+        .else
+.equ PLY_AKY_USE_Noise , 0
+        .ENDIF

@@ -1,0 +1,38 @@
+.equ HARDWARE_CPC         , 0
+.equ HARDWARE_ENTERPRISE  , 1
+
+    .if HARDWARE_ENTERPRISE
+; =============================================================================
+; if non-zero, the envelope emulation routine is disabled
+.equ NO_ENVELOPE_IRQ        ,   1
+; 2-5: use 6 VINT LPBs, with 51-line VINT pulse after line 34, 86, 138, or 190
+.equ ENABLE_300HZ_IRQ       ,   0
+.equ ENABLE_1000HZ_IRQ      ,   0
+; if enabled, channel A is played at the left, channel B at center,
+; and channel C at right
+.equ ENABLE_STEREO          ,   1
+; envelope sample rate = 1000 / ENV_SRATE_DIV Hz (increase this for lower
+; quality and CPU usage)
+.equ ENV_SRATE_DIV          ,   1 ;1
+; minimum envelope frequency value (should be at least 26 * ENV_SRATE_DIV,
+; and less than 256)
+.equ MIN_ENV_FREQVAL        ,   26 * ENV_SRATE_DIV
+; select how tone and noise being enabled on the same channel should be handled
+;   bit 0 = 0: play tone frequency
+;   bit 0 = 1: play noise frequency
+;         >15: use distortion specified in bits 4-7 (defaults to 30h for noise)
+.equ toneAndNoiseModeAtnns  ,   0
+.equ toneAndNoiseModeBtnns  ,   0
+.equ toneAndNoiseModeCtnns  ,   0
+.equ toneAndNoiseModeAtone  ,   0
+.equ toneAndNoiseModeBtone  ,   0
+.equ toneAndNoiseModeCtone  ,   0
+.equ toneAndNoiseModeAnoise ,   1
+.equ toneAndNoiseModeBnoise ,   1
+.equ toneAndNoiseModeCnoise ,   1
+; DAVE channels assigned to each AY channel
+.equ ayDaveChnA             ,   0
+.equ ayDaveChnB             ,   1
+.equ ayDaveChnC             ,   2
+
+    .endif

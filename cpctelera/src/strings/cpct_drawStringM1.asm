@@ -16,7 +16,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;-------------------------------------------------------------------------------
 .module cpct_strings
-
+ .include "../../CPCteleraHW.src"   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Function: cpct_drawStringM1
@@ -122,7 +122,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .globl cpct_drawCharM1_inner_asm
-
+    .if HARDWARE_CPC
    ;; Enable Lower ROM during char copy operation, with interrupts disabled 
    ;; to prevent firmware messing things up
    ld     a,(_cpct_mode_rom_status) ;; [4] A = mode_rom_status (present value)
@@ -157,3 +157,38 @@ endstring:
    ei                                ;; [1] Enable interrupts
 
 ;; IY Restore and Return provided by bindings
+    .else
+   ;; Enable Lower ROM during char copy operation, with interrupts disabled 
+   ;; to prevent firmware messing things up
+        in      a,(#0xb0)
+        push    af
+        ld      a,#0xff
+        di
+        out     (#0xb0),a 
+
+   jr    firstChar                  ;; [3] Jump to first char (Saves 1 jr back every iteration)
+
+nextChar:
+   ;; Draw next character
+        push    iy
+        push    hl                         ;; [4] Save HL
+        call    cpct_drawCharM1_inner_asm  ;; [5 + 458/466] Draws the next character
+        pop     hl                         ;; [3] Recover HL 
+        pop     iy
+   ;; Increment Pointers
+        inc     hl                         ;; [2] /
+        inc     hl                         ;; [2] | HL += 2 (point to next position in video memory, 8 pixels to the right)
+        inc     iy                         ;; [3] IX += 1 (point to next character in the string)
+
+firstChar:
+        ld      a, (iy)                   ;; [5] A = next character from the string
+        or      a                         ;; [1] Check if A = 0
+        jr      nz, nextChar               ;; [2/3] if A != 0, A is next character, draw it, else end
+
+endstring:
+   ;; After finishing character drawing, restore previous ROM and Interrupts status
+        pop     af
+        ei
+        out     (#0xb0),a 
+;; IY Restore and Return provided by bindings
+    .endif

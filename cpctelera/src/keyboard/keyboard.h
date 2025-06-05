@@ -15,6 +15,8 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //-------------------------------------------------------------------------------
+#define Enterprise
+//#define CPC
 
 //
 //#####################################################################
@@ -49,7 +51,6 @@ extern void cpct_scanKeyboard_if  ();
 extern   u8 cpct_isKeyPressed     (cpct_keyID key) __z88dk_fastcall;
 extern   u8 cpct_isAnyKeyPressed  ();
 extern   u8 cpct_isAnyKeyPressed_f();
-extern   u8 cpct_getKeypressedAsASCII();
 
 //
 // Array: cpct_keyboardStatusBuffer
@@ -63,17 +64,6 @@ extern   u8 cpct_getKeypressedAsASCII();
 // and <cpct_scanKeyboard> 
 //
 extern u8 cpct_keyboardStatusBuffer[10];
-
-//
-// Array: cpct_keyID_to_ASCII_table
-//
-//    80-keys table for converting each <cpct_keyID> to ASCII value. These are only
-// 80 bytes, which are 80 ASCII values, each one for each key, ordered by 8-byte
-// lines (10 total lines) and 8 columns (keys) per line. This is the same order
-// in which <cpct_scanKeyboard> scans the keyboard and fills-in the 
-// <cpct_keyboardStatusBuffer>.
-//
-extern u8 cpct_keyID_to_ASCII_table[80];
 
 //
 // Enum: cpct_keyID
@@ -157,6 +147,7 @@ extern u8 cpct_keyID_to_ASCII_table[80];
 //  Table 1. cpct_keyIDs defined for each possible key, ordered by FKCs
 // (end)
 //
+#ifdef CPC
 enum cpct_e_keyID
 {
   // Matrix Line 00h
@@ -266,5 +257,103 @@ enum cpct_e_keyID
   Joy0_Fire3       = (i16)0x4009,
   Key_Del          = (i16)0x8009
 };
+#endif
+#ifdef Enterprise
+enum cpct_e_keyID
+{
+  // Matrix Line 0x00
+  Key_N            = (i16)0x0100,  // Bit 0 (01h) => | 0000 0001 |
+  Key_BackSlash    = (i16)0x0200,  // Bit 1 (02h) => | 0000 0010 |
+  Key_B            = (i16)0x0400,  // Bit 2 (04h) => | 0000 0100 |
+  Key_C            = (i16)0x0800,  // Bit 3 (08h) => | 0000 1000 |
+  Key_V            = (i16)0x1000,  // Bit 4 (10h) => | 0001 0000 |
+  Key_X            = (i16)0x2000,  // Bit 5 (20h) => | 0010 0000 |
+  Key_Z            = (i16)0x4000,  // Bit 6 (40h) => | 0100 0000 |
+  Joy0_Fire1       = (i16)0x8000,  // Bit 7 (80h) => | 1000 0000 |
+  // Matrix Line 0x01
+  Key_H            = (i16)0x0101,
+  Key_CapsLock     = (i16)0x0201,
+  Key_G            = (i16)0x0401,
+  Key_D            = (i16)0x0801,
+  Key_F            = (i16)0x1001,
+  Key_S            = (i16)0x2001,
+  Key_A            = (i16)0x4001,
+  Joy0_Up          = (i16)0x8001,
+  // Matrix Line 0x02
+  Key_U            = (i16)0x0102,
+  Key_Q            = (i16)0x0202,
+  Key_Y            = (i16)0x0402,
+  Key_R            = (i16)0x0802,
+  Key_T            = (i16)0x1002,
+  Key_E            = (i16)0x2002,
+  Key_W            = (i16)0x4002,
+  Key_Tab          = (i16)0x8002,
+  Joy0_Down        = (i16)0x8002,
+  // Matrix Line 0x03
+  Key_7            = (i16)0x0103,
+  Key_1            = (i16)0x0203,
+  Key_6            = (i16)0x0403,
+  Key_4            = (i16)0x0803,
+  Key_5            = (i16)0x1003,
+  Key_3            = (i16)0x2003,
+  Key_2            = (i16)0x4003,
+  Joy0_Left        = (i16)0x8003,
+  // Matrix Line 0x04
+  Key_F4           = (i16)0x0104,
+  Key_F8           = (i16)0x0204,
+  Key_F3           = (i16)0x0404,
+  Key_F6           = (i16)0x0804,
+  Key_F5           = (i16)0x1004,
+  Key_F7           = (i16)0x2004,
+  Key_F2           = (i16)0x4004,
+  Key_F1           = (i16)0x8004,		
+  Joy0_Right       = (i16)0x8004,		
+  // Matrix Line 0x05
+  Key_8            = (i16)0x0105,
+  Key_Un1          = (i16)0x0205,
+  Key_9            = (i16)0x0405,
+  Key_Hyphen       = (i16)0x0805,
+  Key_0            = (i16)0x1005,
+  Key_Caret        = (i16)0x2005,
+  Key_Del          = (i16)0x4005,
+  Joy1_Fire        = (i16)0x8005,		
+  // Matrix Line 0x06
+  Key_J            = (i16)0x0106,
+  Key_Un2          = (i16)0x0206,
+  Key_K            = (i16)0x0406,
+  Key_SemiColon    = (i16)0x0806,
+  Key_L            = (i16)0x1006,
+  Key_Colon        = (i16)0x2006,
+  Key_OpenBracket  = (i16)0x4006,
+  Joy1_Up          = (i16)0x8006,
+  // Matrix Line 0x07
+  Key_Esc          = (i16)0x0107,
+  Key_CursorDown   = (i16)0x0207,
+  Key_CursorRight  = (i16)0x0407,
+  Key_CursorUp     = (i16)0x0807,
+  Key_Control      = (i16)0x1007,
+  Key_CursorLeft   = (i16)0x2007,
+  Key_Enter        = (i16)0x4007,
+  Joy1_Down        = (i16)0x8007,
+  // Matrix Line 0x08
+  Key_M            = (i16)0x0108,
+  Key_Clr          = (i16)0x0208,
+  Key_Comma        = (i16)0x0408,
+  Key_Slash        = (i16)0x0808,
+  Key_Dot          = (i16)0x1008,
+  Key_Shift        = (i16)0x2008,
+  Key_Space        = (i16)0x4008,
+  Joy1_Left        = (i16)0x8008,
+  // Matrix Line 0x09
+  Key_I            = (i16)0x0109,
+  Key_Un3          = (i16)0x0209,
+  Key_O            = (i16)0x0409,
+  Key_At           = (i16)0x0809,
+  Key_P            = (i16)0x1009,
+  Key_CloseBracket = (i16)0x2009,
+  Key_Un4          = (i16)0x4009,
+  Joy1_Right       = (i16)0x8009
+};
 
+#endif
 #endif

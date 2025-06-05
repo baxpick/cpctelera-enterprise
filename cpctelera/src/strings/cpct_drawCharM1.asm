@@ -16,7 +16,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;-------------------------------------------------------------------------------
 .module cpct_strings
-
+ .include "../../CPCteleraHW.src"   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Function: cpct_drawCharM1
@@ -116,7 +116,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .globl cpct_drawCharM1_inner_asm
-
+    .if HARDWARE_CPC
    ;; Enable Lower ROM during char copy operation, with interrupts disabled 
    ;; to prevent firmware messing things up
    ld     a,(_cpct_mode_rom_status)  ;; [4] A = mode_rom_status (present value)
@@ -137,3 +137,19 @@ endDraw:
    ei                                ;; [1] Enable interrupts
 
 ;; Restore IX and Return provided by bindings
+    .else
+        in      a,(#0xb0)
+        push    af
+        ld      a,#0xff
+        di
+        out     (#0xb0),a
+
+        push    iy
+        ld      a, e                       ;; [1] A = ASCII Value of the character
+        call    cpct_drawCharM1_inner_asm  ;; [828/837] Does the actual drawing to screen
+        pop     iy
+endDraw:
+        pop     af
+        ei
+        out     (#0xb0),a
+    .endif

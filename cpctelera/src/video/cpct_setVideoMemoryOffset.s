@@ -16,7 +16,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;-------------------------------------------------------------------------------
 .module cpct_video
-
+ .include "../../CPCteleraHW.src" 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Function: cpct_setVideoMemoryOffset
@@ -105,6 +105,7 @@
 ;; (end code)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+    .if HARDWARE_CPC 
 _cpct_setVideoMemoryOffset::
 cpct_setVideoMemoryOffset_asm::     ;; Assembly entry point
    ;; Select R13 Register from the CRTC and Write there the selected Video Memory Offset
@@ -114,3 +115,90 @@ cpct_setVideoMemoryOffset_asm::     ;; Assembly entry point
    out (c), l        ;; [4] Write Selected Video Memory Offset to R13 (A to port 0xBD)
 
    ret               ;; [3] Return 
+    .else
+
+_cpct_setVideoMemoryOffset::
+cpct_setVideoMemoryOffset_asm::     ;; Assembly entry point
+        push    de
+        in      a,(#0xb3)
+        push    af
+        ld      a,#0xff
+        di
+        out     (#0xb3),a
+        ld      a,(#0xc005)
+        and     #0xc0
+        ld      h,#0x00
+        add     hl,hl
+        add     a,h
+        ld      h,a
+        ex      de,hl
+        ld      hl,(#0xc006)   ;screen y, screen x
+        ld      a,l
+        add     a,a
+        ld      (scraddv+1),a
+        ld      a,h
+        rrca
+        rrca
+        and     #0x1f
+        ld      c,a
+        ld      hl,#0xc004
+        ld      b,#0x00
+setadr: push    bc
+        ld      a,d
+        ld      d,#0x08
+        ld      c,#0x0f
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        add     a,d
+        ld      (hl),e
+        inc     l
+        ld      (hl),a
+        add     hl,bc
+        and     #0xc7
+        ld      d,a
+        ex      de,hl
+scraddv:
+        ld      c,#0x50
+        add     hl,bc
+        ex      de,hl
+        pop     bc
+        dec     c
+        jp      nz,setadr
+        pop     af
+        ei
+        out     (#0xb3),a
+        pop     de
+        ret
+    .endif

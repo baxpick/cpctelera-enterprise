@@ -16,7 +16,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;-------------------------------------------------------------------------------
 .module cpct_strings
-
+ .include "../../CPCteleraHW.src"   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Function: cpct_drawCharM2_inner_asm
@@ -81,7 +81,7 @@
 ;; (end code)  
 ;;    FG: Foreground, BG: Background
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+     .if HARDWARE_CPC 
 ;; Global address of cpct drawCharM2 inner modifiable code. Will be used by 
 ;; cpct_setdrawCharM2 to modify the code for drawing with different colours
 cpct_charm2imc == nextrow
@@ -136,3 +136,59 @@ boundary_crossed:
    adc    h          ;; [1] |
    ld     h, a       ;; [1] \
    jr    nextrow     ;; [3] Jump to continue with next pixel line
+    .else
+
+;; Global address of cpct drawCharM2 inner modifiable code. Will be used by 
+;; cpct_setdrawCharM2 to modify the code for drawing with different colours
+cpct_charm2imc == nextrow
+
+cpct_drawCharM2_inner_asm::
+   ;; Calculate the memory address where the 8 bytes defining the character appearance 
+   ;; ... start (DE = 0x3800 + 8*ASCII value). char0_ROM_address = 0x3800. 
+   ;; ASCII value is in A=|hgfedcba|
+        ld      de,(#0x0016)
+        or      e
+        ld      e, a       ;; [1] C = A, so that DE points to the start of the character definition in ROM memory
+   ;; Now DE = |edcba|000||00111hgf| = 0x3800 + 8*ASCII
+
+   ld     bc, #0x0808   ;; [3] B = Counter for the 8 lines of the character to be copied
+                        ;;     C = Used later on to increment H by adding 8 after each pixel line
+nextrow:
+   ;; Next code gets modified by cpct_setDrawCharM2. When drawing video-inverted a CPL (0x2F) is inserted
+   ;; between the two LDs that move the byte from DE to HL. When drawing all background or all foreground, 
+   ;; a direct #00 or #FF insertion is performed
+   ;; --------- Start of self-modifyiable code block
+   ld    a, (de)  ;; [2] Copy 1 Character Line to Screen (DE -> HL)
+   nop            ;; [1]  -- When painting in Foreground Colour, we do nothing
+                  ;;      -- When painting Background Colour (inverted mode) this gets modified to a CPL (0x2F)
+   ld (hl), a     ;; [2]
+   ;; --------- End of self-modifyiable code block
+
+   ld       a,e
+   add      a,#0x80
+   ld       e,a
+   adc      a,d
+   sub      e
+   ld       d,a
+   dec   b        ;; [1] --B (One less line of the character to be drawn)
+   ret   z        ;; [2/4] IF B=0, end up printing, and return (all lines have been copied)
+
+nextpixelline:
+   ;; Prepare to copy next line 
+   ;;  -- Move HL pointer to the next pixel line on the video memory
+   ld     a, h       ;; [1] /
+   add    c          ;; [1] | HL += 0x800 (Adding 8 to H as 00 is to be added to L)
+   ld     h, a       ;; [1] \
+   ;; Check if new address has crossed character boundaries (every 8 pixel lines)
+   and   #0x38       ;; [2] We check if we have crossed memory boundary (every 8 pixel lines)
+   jr    nz, nextrow ;; [2/3]  by checking the 4 bits that identify present memory line. 
+                     ;; .... If 0, we have crossed boundaries
+boundary_crossed:
+   ld     a, #0x50   ;; [2] / 
+   add    l          ;; [1] | HL = HL + 0xC050 
+   ld     l, a       ;; [1] |  Relocate HL pointer to the start of the next pixel line in video memory
+   ld     a, #0xC0   ;; [2] |
+   adc    h          ;; [1] |
+   ld     h, a       ;; [1] \
+   jr    nextrow     ;; [3] Jump to continue with next pixel line
+    .endif

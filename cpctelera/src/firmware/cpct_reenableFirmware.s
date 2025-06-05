@@ -25,7 +25,7 @@
 .module cpct_firmware
 
 .include /firmware.s/
-
+ .include "../../CPCteleraHW.src"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Function: cpct_reenableFirmware
@@ -74,6 +74,7 @@
 ;; (end code)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+    .if HARDWARE_CPC
 .equ JP_opcode, 0xC3
 
 _cpct_reenableFirmware::
@@ -83,4 +84,18 @@ cpct_reenableFirmware_asm::
    ld (firmware_RST_jp), a    ;; [4] Put JP instruction at 0x0038, to create a jump to the pointer at 0x0039
    ld (firmware_RST_jp+1), hl ;; [5] HL = previous interrupt handler pointer (firmware ROM pointer)
    ei                         ;; [1] Reenable interrupts and return
+   ret                        ;; [3] Return 
+    .else
+
+.equ JP_opcode, 0xC3
+
+_cpct_reenableFirmware::
+cpct_reenableFirmware_asm::
+   di                         ;; [1] Disable interrupts
+   ld a,#0xf5
+   ld hl, #0x1837               ;; [2] A = 0xC3, opcode for JP instruction
+   ld (firmware_RST_jp), a    ;; [4] Put JP instruction at 0x0038, to create a jump to the pointer at 0x0039
+   ld (firmware_RST_jp+1), hl ;; [5] HL = previous interrupt handler pointer (firmware ROM pointer)
+   ei                         ;; [1] Reenable interrupts and return
    ret                        ;; [3] Return
+    .endif

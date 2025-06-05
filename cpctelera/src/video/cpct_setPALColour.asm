@@ -22,7 +22,7 @@
 ;#####################################################################
 ;
 .module cpct_video
-
+ .include "../../CPCteleraHW.src"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Function: cpct_setPALColour
 ;;
@@ -87,6 +87,7 @@
 ;; http://www.grimware.org/doku.php/documentations/devices/gatearray
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+    .if HARDWARE_CPC
   ;or  #PAL_PENR           ;; [2] (CCCnnnnn) Mix 3 bits for PENR command (C) and 5 for PEN number (n). 
                            ;; .... As PENR command is 000, nothing to be done here.
    ld     b, #GA_port_byte ;; [2] B = Gate Array Port (0x7F). L has the command that GA will execute.
@@ -97,3 +98,39 @@
    out  (c), a             ;; [4] GA command: Set INKR. A = Command + Parameter 
                            ;; .... (INKR + INK to be set for selected PEN number)
    ret                     ;; [3] Return
+    .else
+
+  ;or  #PAL_PENR           ;; [2] (CCCnnnnn) Mix 3 bits for PENR command (C) and 5 for PEN number (n). 
+                           ;; .... As PENR command is 000, nothing to be done here.
+        di
+        bit     3,l
+        ret     nz
+        bit     4,l
+        jr      nz,border
+        in      a,(#0xb3)
+        push    af
+        ld      a,#0xff
+        out     (#0xb3),a
+        push    de
+        ld      a,(#0xc007)   ;screen y
+        ld      b,a
+        ld      a,h
+        set     3,l
+        ld      h,#0xc0
+        ld      de,#0x0010
+fillcol1:
+        ld      (hl),a
+        add     hl,de
+        ld      (hl),a
+        add     hl,de
+        djnz    fillcol1
+        pop     de
+        pop     af
+        out     (#0xb3),a                           ;; .... (INKR + INK to be set for selected PEN number)
+        ei
+        ret                     ;; [3] Return
+border: ld      a,h
+        out     (#0x81),a
+        ei
+        ret
+    .endif

@@ -17,7 +17,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;-------------------------------------------------------------------------------
 .module cpct_memutils
-
+.include "../../CPCteleraHW.src" 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Function: cpct_pageMemory
@@ -95,7 +95,7 @@
 ;; (end code)
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+.if HARDWARE_CPC
 pageMemory:
   or   #0xC0		    ;; [2] Use Gate Array function 3: Ram Banking (0b11-------).
                     ;;     Rest of A register holds our desired memory bank configuration
@@ -103,3 +103,45 @@ pageMemory:
   out  (c), a       ;; [4] Submit this order to Gate Array
   
   ret               ;; [3] Then Return
+.else
+pageMemory:
+    and     #0x07
+    push    hl
+    add     a,a
+    add     a,a
+    add     a,#<cpcbank
+    ld      l,a
+    adc     a,#>cpcbank
+    sub     l
+    ld      h,a
+    ld      b,#0x00
+    ld      c,(hl)
+    di
+    ld      a,(bc)
+    out     (#0xb0),a
+    inc     hl
+    ld      c,(hl)
+    ld      a,(bc)
+    out     (#0xb1),a
+    inc     hl
+    ld      c,(hl)
+    ld      a,(bc)
+    out     (#0xb2),a
+    inc     hl
+    ld      c,(hl)
+    ld      a,(bc)
+    ei
+    out     (#0xb3),a
+    pop     hl
+    ret
+
+cpcbank:
+    .db #0x00,#0x01,#0x02,#0x03
+    .db #0x00,#0x01,#0x02,#0x07
+    .db #0x04,#0x05,#0x06,#0x07
+    .db #0x00,#0x03,#0x02,#0x07
+    .db #0x00,#0x04,#0x02,#0x03
+    .db #0x00,#0x05,#0x02,#0x03
+    .db #0x00,#0x06,#0x02,#0x03
+    .db #0x00,#0x07,#0x02,#0x03
+.endif

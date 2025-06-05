@@ -163,7 +163,8 @@
 ;; created on 2018/08/20 by <CNGSoft at http://cngsoft.no-ip.org/index.htm>.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+ .include "../../CPCteleraHW.src" 
+    .if HARDWARE_CPC 
 ; IX=^OFFSET,DE=LENGTH; IX+++,DE---,H=$FF?,ABCLF!,CF=OK?
    di                ;; Disable interrupts before starting
 
@@ -276,3 +277,4 @@ exit:
    ei                ;; Enable interrupts again
    
 ;; Return instruction provided by bindings
+    .endif

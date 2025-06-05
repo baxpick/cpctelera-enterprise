@@ -18,7 +18,7 @@
 .module cpct_firmware
 
 .include /firmware.s/
-
+.include "../../CPCteleraHW.src"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Title: Enabling / disabling ROMs
@@ -97,7 +97,7 @@
 ;; -----------------------------------
 ;; (end code)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+    .if HARDWARE_CPC
 .globl _cpct_mode_rom_status
 
 _cpct_enableLowerROM::
@@ -132,5 +132,24 @@ mrs_operation:
    ld (hl), a                ;; [2] Save new Mode and ROM status for later use if required
 
    ret                       ;; [3] Return
+    .else
 
+.globl _cpct_mode_rom_status
 
+_cpct_enableLowerROM::
+cpct_enableLowerROM_asm::
+
+_cpct_disableLowerROM::
+cpct_disableLowerROM_asm::
+
+_cpct_enableUpperROM::
+cpct_enableUpperROM_asm::
+
+_cpct_disableUpperROM::
+cpct_disableUpperROM_asm::
+
+mrs_modifyROMstatus:
+
+mrs_operation:
+   ret
+    .endif

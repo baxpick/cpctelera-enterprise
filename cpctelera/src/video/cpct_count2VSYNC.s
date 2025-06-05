@@ -18,7 +18,7 @@
 .module cpct_video
    
 .include /videomode.s/
-
+ .include "../../CPCteleraHW.src"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Function: cpct_count2VSYNC
 ;;
@@ -82,7 +82,7 @@
 ;;  needed to process. It will vary depending on how much time has passed since 
 ;;  the last VSYNC.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+    .if HARDWARE_CPC
 _cpct_count2VSYNC::
 cpct_count2VSYNC_asm::	
    ld    b, #PPI_PORT_B ;; [2] B = F5h ==> B has the address of PPI Port B, where we get information from VSYNC
@@ -95,3 +95,17 @@ wvs_wait:
    jr   nc, wvs_wait    ;; [2/3] No Carry means No VSYNC, so loop While No Carry
 
    ret                  ;; [3] Carry Set, VSYNC Active, Return
+    .else
+
+_cpct_count2VSYNC::
+cpct_count2VSYNC_asm::	
+   ld   hl, #0          ;; [3] HL=0 HL will be the loop iterations counter, as it is directly used as return value in C
+
+wvs_wait:
+   inc  hl              ;; [2] HL++ counting new iteration of the waiting loop
+   in    a,(#0xb4)        ;; [4] A = Status register got from PPI port B
+   and  #0x10             ;; [1] Move bit 0 of A to Carry (bit 0 contains VSYNC status)
+   jr   z, wvs_wait     ;; [2/3] No Carry means No VSYNC, so loop While No Carry
+
+   ret                  ;; [3] Carry Set, VSYNC Active, Return
+    .endif

@@ -18,7 +18,7 @@
 .module cpct_firmware
 
 .include /firmware.s/
-
+ .include "../../CPCteleraHW.src"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Function: cpct_disableFirmware
@@ -128,7 +128,7 @@
 ;; -------------------------------------
 ;; (end code)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+    .if HARDWARE_CPC
 _cpct_disableFirmware::
 cpct_disableFirmware_asm::
 _cpct_removeInterruptHandler::
@@ -141,7 +141,25 @@ cpct_removeInterruptHandler_asm::
    ld   hl, #0xC9FB               ;; [3] FB C9 (take into account little endian) => EI : RET
 
    ld (firmware_RST_jp), hl       ;; [5] Setup new "null interrupt handler" and enable interrupts again
-   ei                             ;; [1] Reenable interrupts
+   ei                             ;; [1]
    ex   de, hl                    ;; [1] HL = Pointer to previous interrupt handler (return value)
 
    ret                            ;; [3] Return
+    .else
+
+_cpct_disableFirmware::
+cpct_disableFirmware_asm::
+_cpct_removeInterruptHandler::
+cpct_removeInterruptHandler_asm::
+   di                             ;; [1] Disable interrupts
+   ex   de, hl                    ;; [1] DE = HL (DE saves present pointer to previous interrupt handler)
+
+   ld a,#0xf5
+   ld hl, #0x1837             ;; [2] A = 0xC3, opcode for JP instruction
+   ld (firmware_RST_jp), a    ;; [4] Put JP instruction at 0x0038, to create a jump to the pointer at 0x0039
+   ld (firmware_RST_jp+1), hl ;; [5] HL = previous interrupt handler pointer (firmware ROM pointer)    
+   ei                             ;; [1]
+   ex   de, hl                    ;; [1] HL = Pointer to previous interrupt handler (return value)
+
+   ret                            ;; [3] Return
+    .endif

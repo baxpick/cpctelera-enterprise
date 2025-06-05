@@ -22,7 +22,7 @@
 ;#####################################################################
 ;
 .module cpct_video
-
+ .include "../../CPCteleraHW.src"   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Function: cpct_setCRTCReg
 ;;
@@ -81,7 +81,7 @@
 ;; (end code)
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+    .if HARDWARE_CPC
    ;; Select CRTC the register to be modified
    ld     a, b                ;; [1] A = Value to be set (Save for later use)
    ld     b, #CRTC_SELECTREG  ;; [2] B = 0xBC CRTC Select Register, C = register number to be selected
@@ -92,3 +92,102 @@
    out  (c), c                ;; [4] Set the value
 
    ret                        ;; [3] Return to caller
+    .else
+        ld      e,c
+        ld      d,#0x00
+        ld      hl,#crtregs
+        add     hl,de
+        ld      a,(hl)
+        ld      (regsel+1),a
+regsel: jr      #0x00
+crtreg1:
+        call    pagein
+        ld      a,b
+        ld      (#0xc006),a     ;screen x
+        srl     a
+        ld      b,a
+        ld      a,#0x1f
+        sub     b
+        ld      c,a             ;left margin
+        add     a,b
+        add     a,b
+        ld      h,a             ;right margin
+        ld      a,(#0xc006)     ;screen y
+        ld      b,a
+        ld      a,h
+        call    set_margins
+        ld      a,(pageout+1)
+        push    af
+        ld      de,(#0xc004)
+        jp      setaddr
+
+crtreg6:
+        call    pagein
+        ld      a,b
+        cp      #0x1a
+        jr      c,height_ok
+        ld      a,#0x19
+height_ok:
+        add     a,a
+        add     a,a
+        ld      (#0xc007),a     ;screen y
+        add     a,a
+        ld      b,a
+        ld      a,#0xc8
+        sub     b
+        push    af
+        ld      hl,(#0xc002)    ;rght,left margin
+        ld      c,l
+        ld      a,h
+        call    set_margins
+        ld      c,a
+        pop     af
+        jr      z,pageout
+        ld      b,a
+        ld      a,c
+        ld      c,#0x3f
+        call    set_margins
+pageout:
+        ld      a,#0x00
+        ei
+        out     (#0xb3),a
+crtcret:
+        ret
+
+
+pagein: in      a,(#0xb3)
+        ld      (pageout+1),a
+        ld      a,#0xff
+        di
+        out     (#0xb3),a
+        ret
+
+crtregc:
+        ld      l,b
+        jp      _cpct_setVideoMemoryPage
+crtregd:
+        ld      l,b
+        jp      _cpct_setVideoMemoryOffset
+
+set_margins:
+        ld      hl,#0xc002      ;left margin
+        ld      de,#0x000f
+setmarg:
+        ld      (hl),c
+        inc     l
+        ld      (hl),a
+        add     hl,de
+        ld      (hl),c
+        inc     l
+        ld      (hl),a
+        add     hl,de
+        djnz    setmarg
+        ret
+
+        .include "video/cpct_setVideoMemoryPage.s"
+        .include "video/cpct_setVideoMemoryOffset.s"
+
+crtregs:
+        .db     crtcret-crtreg1,crtreg1-crtreg1,crtcret-crtreg1,crtcret-crtreg1,crtcret-crtreg1,crtcret-crtreg1,crtreg6-crtreg1,crtcret-crtreg1
+        .db     crtcret-crtreg1,crtcret-crtreg1,crtcret-crtreg1,crtcret-crtreg1,crtregc-crtreg1,crtregd-crtreg1,crtcret-crtreg1,crtcret-crtreg1
+   .endif
