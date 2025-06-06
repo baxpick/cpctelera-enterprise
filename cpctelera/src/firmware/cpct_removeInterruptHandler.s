@@ -59,7 +59,7 @@
 ;; own uses.
 ;;
 ;; Destroyed Register values: 
-;;    HL, DE
+;;    HL
 ;;
 ;; Required memory:
 ;;    16 bytes
@@ -115,7 +115,7 @@
 ;; operation.
 ;;
 ;; Destroyed Register values: 
-;;    HL, DE
+;;    HL
 ;;
 ;; Required memory:
 ;;    16 bytes
@@ -151,15 +151,23 @@ _cpct_disableFirmware::
 cpct_disableFirmware_asm::
 _cpct_removeInterruptHandler::
 cpct_removeInterruptHandler_asm::
-   di                             ;; [1] Disable interrupts
-   ex   de, hl                    ;; [1] DE = HL (DE saves present pointer to previous interrupt handler)
+   di                               ;; [1] Disable interrupts
+   ex       de, hl                  ;; [1] DE = HL (DE saves present pointer to previous interrupt handler)
 
-   ld a,#0xf5
-   ld hl, #0x1837             ;; [2] A = 0xC3, opcode for JP instruction
-   ld (firmware_RST_jp), a    ;; [4] Put JP instruction at 0x0038, to create a jump to the pointer at 0x0039
-   ld (firmware_RST_jp+1), hl ;; [5] HL = previous interrupt handler pointer (firmware ROM pointer)    
-   ei                             ;; [1]
-   ex   de, hl                    ;; [1] HL = Pointer to previous interrupt handler (return value)
+   ld       a,#0xc3
+   ld       hl,dummyINT             ;; [2] A = 0xC3, opcode for JP instruction
+   ld       (firmware_RST_jp), a    ;; [4] Put JP instruction at 0x0038, to create a jump to the pointer at 0x0039
+   ld       (firmware_RST_jp+1), hl ;; [5] HL = previous interrupt handler pointer (firmware ROM pointer)    
+   ei                               ;; [1]
+   ex       de, hl                  ;; [1] HL = Pointer to previous interrupt handler (return value)
 
-   ret                            ;; [3] Return
+   ret                              ;; [3] Return
+
+dummyINT:
+    push    af
+    ld      a,0x30
+    out     (0xb4),a
+    pop     af
+    ei
+    ret
     .endif
