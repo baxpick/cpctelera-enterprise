@@ -4,10 +4,10 @@
     .if HARDWARE_ENTERPRISE
 ; =============================================================================
 ; if non-zero, the envelope emulation routine is disabled
-.equ NO_ENVELOPE_IRQ        ,   1
+.equ NO_ENVELOPE_IRQ        ,   0
 ; 2-5: use 6 VINT LPBs, with 51-line VINT pulse after line 34, 86, 138, or 190
 .equ ENABLE_300HZ_IRQ       ,   0
-.equ ENABLE_1000HZ_IRQ      ,   0
+.equ ENABLE_1000HZ_IRQ      ,   1
 ; if enabled, channel A is played at the left, channel B at center,
 ; and channel C at right
 .equ ENABLE_STEREO          ,   1
