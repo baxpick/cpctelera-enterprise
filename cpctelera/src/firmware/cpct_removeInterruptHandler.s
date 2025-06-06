@@ -155,7 +155,7 @@ cpct_removeInterruptHandler_asm::
    ex       de, hl                  ;; [1] DE = HL (DE saves present pointer to previous interrupt handler)
 
    ld       a,#0xc3
-   ld       hl,dummyINT             ;; [2] A = 0xC3, opcode for JP instruction
+   ld       hl,#dummyINT             ;; [2] A = 0xC3, opcode for JP instruction
    ld       (firmware_RST_jp), a    ;; [4] Put JP instruction at 0x0038, to create a jump to the pointer at 0x0039
    ld       (firmware_RST_jp+1), hl ;; [5] HL = previous interrupt handler pointer (firmware ROM pointer)    
    ei                               ;; [1]
@@ -165,7 +165,7 @@ cpct_removeInterruptHandler_asm::
 
 dummyINT:
     push    af
-    ld      a,0x30
+    ld      a,#0x30
     out     (0xb4),a
     pop     af
     ei
