@@ -134,48 +134,12 @@ cpct_safeInterruptHandlerCall:
 
 cpct_safeInterruptHandlerHook::
    push af     ;; [4] Save all standard registers on the stack
-   .ifeq NO_ENVELOPE_IRQ
-    .if ENABLE_1000HZ_IRQ
-        in      a,(#0xb4)
-        and     #0x02
-        jr      z,vidint
-        ld      a, #0x13
-        out     (#0xb4), a
-        rst     #0x28           ;call    envelopeInterrupt
-        pop     af
-        ei
-        ret
-vidint:
-        ld      a,#0x31
-        out     (#0xb4),a
-    .else
-     .if ENABLE_300HZ_IRQ
-cntr    ld      a,#0x30
-        out     (#0xb4),a
-        rst     #0x28           ;call    envelopeInterrupt
-        ld      a,#0x06
-        dec     a
-        ld      (cntr+1),a
-        jr      z,vidint
-        pop     af
-        ei
-        ret
-vidint: ld      a,#0x06
-        ld      (cntr+1),a
-     .else
-        ld      a,#0x30
-        out     (#0xb4),a
-        rst     #0x28           ;call    envelopeInterrupt
-     .endif
-    .endif
-   .endif
-
    push bc     ;; [4]
    push de     ;; [4]
    push hl     ;; [4]
    push ix     ;; [5]
    push iy     ;; [5]
-    .if NO_ENVELOPE_IRQ
+    .ifeq ENABLE_1000HZ_IRQ
    ld   a,#0x30
    out  (#0xb4),a
     .endif

@@ -31,8 +31,6 @@ toneAndNoiseModeAtone   set 1 if you want to get noise frequency on channel A
 toneAndNoiseModeAtoise  set 1 if you want to get tone frequency on channel A
 
 EP file loader is start.src it can be translated by sjasm 0.39.
-usage: 
-    sjasm.exe start.src start.com
 it is prepared for loading 3 files, 1 screen, 1 binary which is called, and after finish returns to loader, and for the final binary file.
 Screen file and 1st binary can be omitted if any of them does not exist by specifying load address 0 to the file which is going to be omitted.
 Load address, load length, start address, and file name has to be updated in start.src
