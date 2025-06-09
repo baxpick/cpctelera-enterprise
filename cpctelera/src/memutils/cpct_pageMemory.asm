@@ -105,35 +105,29 @@ pageMemory:
   ret               ;; [3] Then Return
 .else
 pageMemory:
-    and     #0x07
-    push    hl
-    add     a,a
-    add     a,a
-    add     a,#<cpcbank
-    ld      l,a
-    adc     a,#>cpcbank
-    sub     l
-    ld      h,a
-    ld      b,#0x00
-    ld      c,(hl)
-    di
-    ld      a,(bc)
-    out     (#0xb0),a
-    inc     hl
-    ld      c,(hl)
-    ld      a,(bc)
-    out     (#0xb1),a
-    inc     hl
-    ld      c,(hl)
-    ld      a,(bc)
-    out     (#0xb2),a
-    inc     hl
-    ld      c,(hl)
-    ld      a,(bc)
-    ei
-    out     (#0xb3),a
-    pop     hl
-    ret
+        jr      setup_memtbl
+;        and     #0x07
+        add     a,a
+        add     a,a
+        add     a,#<cpcbank
+        ld      c,a
+        adc     a,#>cpcbank
+        sub     c
+        ld      b,a
+        di
+        ld      a,(bc)
+        out     (#0xb0),a
+        inc     bc
+        ld      a,(bc)
+        out     (#0xb1),a
+        inc     bc
+        ld      a,(bc)
+        out     (#0xb2),a
+        inc     bc
+        ld      a,(bc)
+        ei
+        out     (#0xb3),a
+        ret
 
 cpcbank:
     .db #0x00,#0x01,#0x02,#0x03
@@ -144,4 +138,32 @@ cpcbank:
     .db #0x00,#0x05,#0x02,#0x03
     .db #0x00,#0x06,#0x02,#0x03
     .db #0x00,#0x07,#0x02,#0x03
+
+setup_memtbl:
+        di
+        push    af
+        push    hl
+        push    de
+        in      a,(#0xb3)
+        push    af
+        ld      a,#0xff
+        out     (#0xb3),a
+        ld      b,#0x20
+        ld      de,#cpcbank
+buildt: ld      hl,#0xccd8
+        ld      a,(de)
+        add     a,l
+        ld      l,a
+        ld      a,(hl)
+        ld      (de),a
+        inc     de
+        djnz    buildt
+        ld      hl,#0x07e6
+        ld      (pageMemory),hl
+        pop     af
+        out     (#0xb3),a
+        pop     de
+        pop     hl
+        pop     af
+        jr      pageMemory
 .endif

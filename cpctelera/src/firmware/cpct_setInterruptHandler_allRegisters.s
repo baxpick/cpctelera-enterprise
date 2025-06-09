@@ -19,6 +19,7 @@
 .module cpct_firmware
 
 .include /firmware.s/
+.include "../../CPCteleraHW.src"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -97,6 +98,7 @@ cpct_setInterruptHandler_allRegisters_asm::
 
    ret                                           ;; [3] Return
 
+.if HARDWARE_CPC
 ;;
 ;; Interrupt Handler Safe Wrapper Code. This is the code that
 ;; will be called at the start of the interrupt, and this code
@@ -133,3 +135,78 @@ cpct_safeInterruptHandlerCallAllRegs:
    pop  af     ;; [3]
    ei          ;; [1] Reenable interrupts
    reti        ;; [4] Return to main program
+
+.else
+
+cpct_safeInterruptHandlerHookAllRegs::
+   push af     ;; [4] Save all standard registers on the stack
+   .ifeq NO_ENVELOPE_IRQ
+ .globl envelopeInterrupt
+    .if ENABLE_1000HZ_IRQ
+        in      a,(#0xb4)
+        and     #0x02
+        jr      z,vidint
+        ld      a, #0x13
+        out     (#0xb4), a
+        call    envelopeInterrupt
+        pop     af
+        ei
+        ret
+vidint:
+        ld      a,#0x31
+        out     (#0xb4),a
+    .else
+     .if ENABLE_300HZ_IRQ
+cntr    ld      a,#0x30
+        out     (#0xb4),a
+        call    envelopeInterrupt
+        ld      a,#0x06
+        dec     a
+        ld      (cntr+1),a
+        jr      z,vidint
+        pop     af
+        ei
+        ret
+vidint: ld      a,#0x06
+        ld      (cntr+1),a
+     .else
+        ld      a,#0x30
+        out     (#0xb4),a
+        call    envelopeInterrupt
+     .endif
+    .endif
+   .endif
+
+   push bc     ;; [4]
+   push de     ;; [4]
+   push hl     ;; [4]
+   push ix     ;; [5]
+   push iy     ;; [5]
+   ex af,af'   ;; [1] Swap af/af'
+   exx         ;; [1] Swap bc/bc' de/de' and hl/hl'
+   push af     ;; [4] Save all alternate registers on the stack
+   push bc     ;; [4]
+   push de     ;; [4]
+   push hl     ;; [4]
+    .if NO_ENVELOPE_IRQ
+   ld   a,#0x30
+   out  (#0xb4),a
+    .endif
+cpct_safeInterruptHandlerCallAllRegs:
+   call #0000  ;; [5] Call Interrupt Handler
+   pop  hl     ;; [3] Restore all alternate registers
+   pop  de     ;; [3]
+   pop  bc     ;; [3]
+   pop  af     ;; [3]
+   exx         ;; [1] Swap bc/bc' de/de' and hl/hl'
+   ex af,af'   ;; [1] Swap af/af'
+   pop  iy     ;; [4] Restore all standard registers
+   pop  ix     ;; [4]
+   pop  hl     ;; [3]
+   pop  de     ;; [3]
+   pop  bc     ;; [3]
+   pop  af     ;; [3]
+   ei          ;; [1] Reenable interrupts
+   ret         ;; [3] Return to main program
+   
+.endif
