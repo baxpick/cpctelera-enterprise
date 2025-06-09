@@ -231,28 +231,6 @@ PLY_AKY_Init_SkipHeadeENDM:
 
 _cpct_akpAKY_musicPlay::
 cpct_akpAKY_musicPlay_asm::   ;; Entry point for assembly calls  
-  .if HARDWARE_ENTERPRISE
-   .ifeq NO_ENVELOPE_IRQ
-    .if ENABLE_1000HZ_IRQ
-        in      a,(#0xb4)
-        and     #0x02
-        jp      nz,envelopeInterrupt
-        ld      a,#0x31
-        out     (#0xb4),a
-    .else
-     .if ENABLE_300HZ_IRQ
-cntr    ld      a,#0x06
-        dec     a
-        ld      (cntr+1),a
-        jp      nz,envelopeInterrupt
-        ld      a,#0x06
-        ld      (cntr+1),a
-     .else
-        call    envelopeInterrupt
-     .endif
-    .endif
-   .endif
-  .endif
 
 ;       Plays the music. It must have been initialized before.
 ;       The interruption SHOULD be disabled (DI), as the stack is heavily used.
@@ -1884,10 +1862,6 @@ PLY_AKY_RetTable_ReadRegisterBlock:
 
 envelopeInterrupt:
 
-    .if ENABLE_1000HZ_IRQ 
-        ld    a, #0x13
-        out   (#0xb4), a
-    .endif
         push  hl
         push  bc
 envelopeInterrupt.l1:    ld    hl,#0x0000                 ; * envelope counter
@@ -2304,6 +2278,10 @@ ayReset.l1:    inc   hl
         ld    (envelopeInterrupt.l10 + 1), a
         xor     a
         ld    (setChannelAmplitude.l3 + 1), a
+        ld      a,#0xc3
+        ld      hl,#envelopeInterrupt
+        ld      (#0x0029),hl
+        ld      (#0x0028),a
     .endif
         ld    a, #0x04
         out   (#0xbf), a
