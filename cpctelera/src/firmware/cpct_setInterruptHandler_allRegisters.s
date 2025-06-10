@@ -140,7 +140,7 @@ cpct_safeInterruptHandlerCallAllRegs:
 
 cpct_safeInterruptHandlerHookAllRegs::
    push af     ;; [4] Save all standard registers on the stack
-   .ifeq NO_ENVELOPE_IRQ
+   .if NO_ENVELOPE_IRQ
  .globl envelopeInterrupt
     .if ENABLE_1000HZ_IRQ
         in      a,(#0xb4)

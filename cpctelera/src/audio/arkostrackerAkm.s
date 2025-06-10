@@ -314,7 +314,7 @@ PLY_AKM_RegistersForRom:
                .if PLY_AKM_USE_NoiseRegister          ;CONFIG SPECIFIC
                        .db 6
                .endif
-               .ifeq PLY_CFG_UseHardwareSounds         ;CONFIG SPECIFIC
+               .if PLY_CFG_UseHardwareSounds         ;CONFIG SPECIFIC
                        .db 7 + 128
                .else
                        .db 7, 11, 12 + 64     ;13 is NOT declared, special case.
@@ -389,7 +389,7 @@ _cpct_akpAKM_stop::
 cpct_akpAKM_stop_asm::  ;; Entry point for assembly calls  
 PLY_AKM_StopDisarkGenerateExternalLabel:
 PLY_AKM_Stop:
-       .ifeq PLY_AKM_HARDWARE_ENTERPRISE 
+       .if PLY_AKM_HARDWARE_ENTERPRISE 
         ld (PLY_AKM_SaveSP + PLY_AKM_Offset1b),sp
        .endif
         xor a
@@ -464,11 +464,11 @@ cpct_akpAKM_musicPlay_asm::   ;; Entry point for assembly calls
 ;The stack is saved and restored, but is diverted, so watch out for the interruptions.
 PLY_AKM_PlayDisarkGenerateExternalLabel:
 PLY_AKM_Play:
-       .ifeq PLY_AKM_HARDWARE_ENTERPRISE 
+       .if PLY_AKM_HARDWARE_ENTERPRISE 
         ld (PLY_AKM_SaveSP + PLY_AKM_Offset1b),sp
        .endif
         ;Reads a new line?
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_TickCounter: ld a,#0x00
         inc a
 PLY_AKM_Speed: cp #0x01                       ;Speed (>0).
@@ -482,7 +482,7 @@ PLY_AKM_Speed: cp #0x01                       ;Speed (>0).
         jp nz,PLY_AKM_TickCounterManaged
 
         ;A new line must be read. But have we reached the end of the Pattern?
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_PatternRemainingHeight: ld a,#0x00              ;Height. If 0, end of the pattern.
        .else
         ld a,(PLY_AKM_PatternRemainingHeight)
@@ -495,13 +495,13 @@ PLY_AKM_PatternRemainingHeight: ld a,#0x00              ;Height. If 0, end of th
 
         ;New pattern. Reads the Linker.
 PLY_AKM_Linker:
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_TrackIndex: ld de,#0x0000              ;DE' points on the Track Index. Useful when new Tracks are found.
        .else
         ld de,(PLY_AKM_TrackIndex)
        .endif
         exx
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_PtLinker: ld hl,#0x0000
        .else
         ld hl,(PLY_AKM_PtLinker)
@@ -513,7 +513,7 @@ PLY_AKM_LinkerPostPt:
         ld (PLY_AKM_Track2_WaitEmptyCell),a
         ld (PLY_AKM_Track3_WaitEmptyCell),a
         ;On new pattern, the escape note/instrument/wait values are set for each Tracks.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_DefaultStartNoteInTracks: ld a,#0x00
        .else
         ld a,(PLY_AKM_DefaultStartNoteInTracks)
@@ -521,7 +521,7 @@ PLY_AKM_DefaultStartNoteInTracks: ld a,#0x00
         ld (PLY_AKM_Track1_EscapeNote),a
         ld (PLY_AKM_Track2_EscapeNote),a
         ld (PLY_AKM_Track3_EscapeNote),a
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_DefaultStartInstrumentInTracks: ld a,#0x00
        .else
         ld a,(PLY_AKM_DefaultStartInstrumentInTracks)
@@ -529,7 +529,7 @@ PLY_AKM_DefaultStartInstrumentInTracks: ld a,#0x00
         ld (PLY_AKM_Track1_EscapeInstrument),a
         ld (PLY_AKM_Track2_EscapeInstrument),a
         ld (PLY_AKM_Track3_EscapeInstrument),a
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_DefaultStartWaitInTracks: ld a,#0x00
        .else
         ld a,(PLY_AKM_DefaultStartWaitInTracks)
@@ -573,7 +573,7 @@ PLY_AKM_LinkerAfterSpeedChange:
         jr PLY_AKM_LinkerSetRemainingHeight
         ;The same height is used. It was stored before.
 PLY_AKM_LinkerUsePreviousHeight:
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_LinkerPreviousRemainingHeight: ld a,#0x00
        .else
         ld a,(PLY_AKM_LinkerPreviousRemainingHeight)
@@ -597,7 +597,7 @@ PLY_AKM_LinkerSetRemainingHeight:
 ;Reads the Tracks.
 ;---------------------------------
 PLY_AKM_ReadLine:
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_PtInstruments: ld de,#0x0000
 PLY_AKM_NoteIndexTable: ld bc,#0x0000
        .else
@@ -765,7 +765,7 @@ PLY_AKM_SendPsgRegisterAfterPop:
 PLY_AKM_SendPsgRegisterR13:
 
         ;Should the R13 be played? Yes only if different. No "force retrig" is managed by this player.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_SetReg13: ld a,#0x00
 PLY_AKM_SetReg13Old: cp #0x00
        .else
@@ -789,7 +789,7 @@ PLY_AKM_SetReg13Old: cp #0x00
                        .endif ;PLY_CFG_UseHardwareSounds
 PLY_AKM_SendPsgRegisterEnd:
 
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_SaveSP: ld sp,#0x0000
        .else
         ld sp,(PLY_AKM_SaveSP)
@@ -900,7 +900,7 @@ PLY_AKM_RT_GetDataByte:
        .endif
         ld a,b
         and #0b1111       ;Keeps only the note/data.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_FlagNoteAndEffectInCell: cp #0x0c          ;0-12 = note reference if no effects in the song, or 0-11 if there are effects in the song.
        .else
         cp c
@@ -984,7 +984,7 @@ PLY_AKM_RT_SameEscapeInstrument:
 
 PLY_AKM_RT_SecondaryInstrument:
         ;Use the secondary instrument.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_SecondaryInstrument: ld a,#0x00
        .else
         ld a,(PLY_AKM_SecondaryInstrument)
@@ -993,7 +993,7 @@ PLY_AKM_SecondaryInstrument: ld a,#0x00
         
 PLY_AKM_RT_PrimaryInstrument:
         ;Use the primary instrument.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_PrimaryInstrument: ld a,#0x00
        .else
         ld a,(PLY_AKM_PrimaryInstrument)
@@ -1073,7 +1073,7 @@ PLY_AKM_RT_SameEscapeWait:
         
 PLY_AKM_RT_PrimaryWait:
         ;Use the primary wait.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_PrimaryWait: ld a,#0x00
        .else
         ld a,(PLY_AKM_PrimaryWait)
@@ -1082,7 +1082,7 @@ PLY_AKM_PrimaryWait: ld a,#0x00
 
 PLY_AKM_RT_SecondaryWait:
         ;Use the secondary wait.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_SecondaryWait: ld a,#0x00
        .else
         ld a,(PLY_AKM_SecondaryWait)
@@ -1095,7 +1095,7 @@ PLY_AKM_RT_StoreCurrentWait:
         ;--------------------
         ;Are there effects to read?
                        .if PLY_CFG_UseEffects        ;CONFIG SPECIFIC
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_RT_ReadEffectsFlag: ld a,#0x00
        .else
         ld a,(PLY_AKM_RT_ReadEffectsFlag)
@@ -1844,7 +1844,7 @@ PLY_AKM_EffectArpeggioTable:
                 ld l,a
                 ld h,#0x00
         ;BC is modified, will be restored below.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_PtArpeggios: ld bc,#0x0000            ;Arpeggio table does not encode entry 0, but the pointer points two bytes earlier to compensate.
        .else
         ld bc,(PLY_AKM_PtArpeggios)
@@ -1891,7 +1891,7 @@ PLY_AKM_EffectPitchTable:
                 ld l,a
                 ld h,#0x00
         ;BC is modified, will be restored below.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_PtPitches: ld bc,#0x0000            ;Pitch table does not encode entry 0, but the pointer points two bytes earlier to compensate.
        .else
         ld bc,(PLY_AKM_PtPitches)
@@ -2064,7 +2064,7 @@ PLY_AKM_Channel3_SoundEffectSpeed          .db      #0x00
        .endif ;PLY_AKM_Rom
         
 ;Data block for channel 1.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_Track1_Data:
        .else
                 counterStartInTrackData = counter                    ;Duplicates the counter value to determine later the size of the track buffer.
@@ -2118,7 +2118,7 @@ PLY_AKM_Track1_CurrentPitchTableValue:     .dw      #0x0000             ;16 bit 
 
                        .endif ;PLY_CFG_UseEffect_PitchTable
 
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_Track1_Data_End:
 .equ PLY_AKM_Track1_Data_Size , PLY_AKM_Track1_Data_End - PLY_AKM_Track1_Data
        .else
@@ -2174,7 +2174,7 @@ PLY_AKM_Track1_Data_End = PLY_AKM_Track1_Data + PLY_AKM_Track1_Data_Size
 
 ;Data block for channel 2.
 ;Data block for channel 2.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_Track2_Data:
        .else
                 counterStartInTrackData = counter                    ;Duplicates the counter value to determine later the size of the track buffer.
@@ -2228,7 +2228,7 @@ PLY_AKM_Track2_CurrentPitchTableValue:     .dw      #0x0000             ;16 bit 
 
                        .endif ;PLY_CFG_UseEffect_PitchTable
 
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_Track2_Data_End:
 .equ PLY_AKM_Track2_Data_Size , PLY_AKM_Track2_Data_End - PLY_AKM_Track2_Data
        .else
@@ -2244,7 +2244,7 @@ PLY_AKM_Track2_Data_End = PLY_AKM_Track2_Data + PLY_AKM_Track2_Data_Size
 .equ PLY_AKM_Track2_EscapeWait          , PLY_AKM_Track2_Data + PLY_AKM_Data_OffsetEscapeWait
 
 ;Data block for channel 3.
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_Track3_Data:
        .else
                 counterStartInTrackData = counter                    ;Duplicates the counter value to determine later the size of the track buffer.
@@ -2298,7 +2298,7 @@ PLY_AKM_Track3_CurrentPitchTableValue:     .dw      #0x0000             ;16 bit 
 
                        .endif ;PLY_CFG_UseEffect_PitchTable
 
-       .ifeq PLY_AKM_Rom
+       .if PLY_AKM_Rom
 PLY_AKM_Track3_Data_End:
 .equ PLY_AKM_Track3_Data_Size , PLY_AKM_Track3_Data_End - PLY_AKM_Track3_Data
        .else
@@ -2320,7 +2320,7 @@ PLY_AKM_Track3_Data_End = PLY_AKM_Track3_Data + PLY_AKM_Track3_Data_Size
 ;is actually a RET table!
 ;---------------------------------------------------------------------
 ;DB register, DB value then DW code to jump to once the value is read.
-       .ifeq PLY_AKM_Rom              ;For ROM, a table is generated.
+       .if PLY_AKM_Rom              ;For ROM, a table is generated.
 PLY_AKM_Registers_RetTable:
 PLY_AKM_Track1_Registers:
        .db 8
