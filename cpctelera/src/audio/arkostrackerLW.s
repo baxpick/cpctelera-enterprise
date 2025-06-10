@@ -67,7 +67,7 @@
 PLY_LW_Start:
 
 .equ PLY_LW_HardwareCounter      , PLY_LW_HARDWARE_CPC + PLY_LW_HARDWARE_MSX + PLY_LW_HARDWARE_SPECTRUM + PLY_LW_HARDWARE_PENTAGON + PLY_LW_HARDWARE_ENTERPRISE
-        .if PLY_LW_HardwareCounter
+        .ifeq PLY_LW_HardwareCounter
 .equ PLY_LW_HARDWARE_ENTERPRISE  , 1
        .endif
        .ifgt PLY_LW_HardwareCounter-1
@@ -124,7 +124,7 @@ PLY_LW_Start:
 .equ PLY_LW_USE_Volume_And_PitchUpDown_Effects , 0
        .endif
 
-      .if PLY_CFG_UseEffect_SetVolume
+      .ifeq PLY_CFG_UseEffect_SetVolume
        .if PLY_LW_USE_EffectPitchUpDown
                 FAIL " plase set: PLY_CFG_UseEffect_SetVolume = 1"
        .endif
@@ -132,10 +132,10 @@ PLY_LW_Start:
         ;Volume and Arpeggio Table dual effect (if one exists, the other one too).
        .if PLY_CFG_UseEffect_SetVolume + PLY_CFG_UseEffect_ArpeggioTable
 .equ PLY_LW_USE_Volume_And_ArpeggioTable_Effects , 1
-           .if PLY_CFG_UseEffect_ArpeggioTable
+           .ifeq PLY_CFG_UseEffect_ArpeggioTable
                 FAIL " plase set: PLY_CFG_UseEffect_ArpeggioTable = 1"
            .endif
-           .if PLY_CFG_UseEffect_SetVolume
+           .ifeq PLY_CFG_UseEffect_SetVolume
                 FAIL " please set: PLY_CFG_UseEffect_SetVolume = 1"
            .endif
        .else
@@ -145,10 +145,10 @@ PLY_LW_Start:
         ;Reset and Arpeggio Table dual effect (if one exists, the other one too).
        .if PLY_CFG_UseEffect_Reset + PLY_CFG_UseEffect_ArpeggioTable
 .equ PLY_LW_USE_Reset_And_ArpeggioTable_Effects , 1
-           .if PLY_CFG_UseEffect_ArpeggioTable
+           .ifeq PLY_CFG_UseEffect_ArpeggioTable
                 FAIL " plase set: PLY_CFG_UseEffect_ArpeggioTable = 1"
            .endif
-           .if PLY_CFG_UseEffect_Reset
+           .ifeq PLY_CFG_UseEffect_Reset
                 FAIL " plase set: PLY_CFG_UseEffect_Reset = 1"
            .endif
        .else
@@ -384,7 +384,7 @@ cpct_akpLW_stop_asm::  ;; Entry point for assembly calls
 
 PLY_LW_StopDisarkGenerateExternalLabel:
 PLY_LW_Stop:
-       .if PLY_LW_HARDWARE_ENTERPRISE
+       .ifeq PLY_LW_HARDWARE_ENTERPRISE
         ld (PLY_LW_SaveSP + 1),sp
        .endif
 
@@ -459,7 +459,7 @@ cpct_akpLW_musicPlay_asm::   ;; Entry point for assembly calls
 ;The stack is saved and restored, but is diverted, so watch out for the interruptions.
 PLY_LW_PlayDisarkGenerateExternalLabel:
 PLY_LW_Play:
-       .if PLY_LW_HARDWARE_ENTERPRISE
+       .ifeq PLY_LW_HARDWARE_ENTERPRISE
         ld (PLY_LW_SaveSP + 1),sp
        .endif
 

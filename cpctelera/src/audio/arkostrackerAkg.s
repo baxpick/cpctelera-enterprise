@@ -66,7 +66,7 @@ PLY_AKG_Start:
 .equ PLY_AKG_Offset2b , 2
        .endif
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 .equ PLY_AKG_OPCODE_OR_A , #0xb7                        ;Opcode for "or a".
 .equ PLY_AKG_OPCODE_SCF , #0x37                         ;Opcode for "scf".
        .else
@@ -210,7 +210,7 @@ PLY_AKG_Init:
         ld b,(hl)
         inc hl
         ld (PLY_AKG_Channel_ReadEffects_EffectBlocks1 + PLY_AKG_Offset1b),bc
-                               .if PLY_AKG_Rom
+                               .ifeq PLY_AKG_Rom
         ;Not used in ROM, the same value is used.
         ld (PLY_AKG_Channel_ReadEffects_EffectBlocks2 + PLY_AKG_Offset1b),bc
                                .endif
@@ -548,7 +548,7 @@ PLY_AKG_Play:
                        .endif ;PLY_CFG_UseEventTracks
 
         ;Decreases the tick counter. If 0 is reached, a new line must be read.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_TickDecreasingCounter: ld a,#0x01
        .else
         ld a,(PLY_AKG_TickDecreasingCounter)
@@ -557,7 +557,7 @@ PLY_AKG_TickDecreasingCounter: ld a,#0x01
         jp nz,PLY_AKG_SetSpeedBeforePlayStreams                 ;Jumps if there is no new line: continues playing the sound stream.
 
         ;New line! Is the Pattern ended? Not as long as there are lines to read.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PatternDecreasingHeight: ld a,#0x01
        .else
         ld a,(PLY_AKG_PatternDecreasingHeight)
@@ -568,7 +568,7 @@ PLY_AKG_PatternDecreasingHeight: ld a,#0x01
         ;New pattern!
         ;Reads the Linker. This is called at the start of the song, or at the end of every position.
 PLY_AKG_ReadLinker:
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 
 PLY_AKG_ReadLinker_PtLinker: ld sp,#0x0000
        .else
@@ -604,7 +604,7 @@ PLY_AKG_ReadLinker_NoLoop:
                        .endif ;PLY_CFG_UseTranspositions
         ;Reads the transposition2 and 3.
                        .if PLY_AKG_UseSpecialTracks                  ;CONFIG SPECIFIC
-                               .if PLY_CFG_UseTranspositions            ;CONFIG SPECIFIC
+                               .ifeq PLY_CFG_UseTranspositions            ;CONFIG SPECIFIC
                                 ;Transpositions not used? We could stop here. BUT the SpecialTracks, if present, must access their data after.
                                 ;So in this case, the transpositions must be skipped.
                                 pop hl
@@ -651,7 +651,7 @@ PLY_AKG_ReadLine:
         ;Reads the Speed Track.
                        .if PLY_CFG_UseSpeedTracks            ;CONFIG SPECIFIC
         ;-------------------------------------------------------------------
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_SpeedTrack_WaitCounter: ld a,#0x00      ;Lines to wait?
        .else
         ld a,(PLY_AKG_SpeedTrack_WaitCounter)
@@ -659,7 +659,7 @@ PLY_AKG_SpeedTrack_WaitCounter: ld a,#0x00      ;Lines to wait?
         sub #0x01
         jr nc,PLY_AKG_SpeedTrack_MustWait       ;Jump if there are still lines to wait.
         ;No more lines to wait. Reads a new data. It may be an event value or a wait value.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 
 PLY_AKG_SpeedTrack_PtTrack: ld hl,#0x0000
        .else
@@ -692,7 +692,7 @@ PLY_AKG_SpeedTrack_End:
         ;Reads the Event Track.
         ;-------------------------------------------------------------------
                        .if PLY_CFG_UseEventTracks            ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_EventTrack_WaitCounter: ld a,#0x00          ;Lines to wait?
        .else
         ld a,(PLY_AKG_EventTrack_WaitCounter)
@@ -700,7 +700,7 @@ PLY_AKG_EventTrack_WaitCounter: ld a,#0x00          ;Lines to wait?
         sub #0x01
         jr nc,PLY_AKG_EventTrack_MustWait       ;Jump if there are still lines to wait.
         ;No more lines to wait. Reads a new data. It may be an event value or a wait value.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 
 PLY_AKG_EventTrack_PtTrack: ld hl,#0x0000
        .else
@@ -734,7 +734,7 @@ PLY_AKG_EventTrack_End:
         ;Reads the possible Cell of the Channel 1, 2 and 3. Use a Macro for each channel, but the code is duplicated.
         ;-------------------------------------------------------------------------
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_WaitCounter: ld a,#0x00      ;Lines to wait?
        .else
         ld a,(PLY_AKG_Channel1_WaitCounter)
@@ -746,7 +746,7 @@ PLY_AKG_Channel1_WaitCounter: ld a,#0x00      ;Lines to wait?
         jp PLY_AKG_Channel1_ReadCellEnd
         
 PLY_AKG_Channel1_ReadTrack:
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 
 PLY_AKG_Channel1_PtTrack: ld hl,#0x0000      ;Points on the Cell to read.
        .else
@@ -792,7 +792,7 @@ PLY_AKG_Channel1_Wait:
         ;Little subcode put here, called just below. A bit dirty, but avoids long jump.
 PLY_AKG_Channel1_SameInstrument:
         ;No new instrument. The instrument pointer must be reset.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_PtBaseInstrument: ld de,#0x0000
        .else
         ld de,(PLY_AKG_Channel1_PtBaseInstrument)
@@ -802,7 +802,7 @@ PLY_AKG_Channel1_PtBaseInstrument: ld de,#0x0000
 
         ;A note has been found, plus maybe an Instrument and effects. A = note. C = still has the New Instrument/Effects flags.
 PLY_AKG_Channel1_Note:
-               .if PLY_AKG_Rom
+               .ifeq PLY_AKG_Rom
 PLY_AKG_BaseNoteIndex: add a,#0x00                  ;The encoded note is only from a 4 octave range, but the first note depends on he best window, determined by the song generator.
                .else
                 ld b,a
@@ -811,7 +811,7 @@ PLY_AKG_BaseNoteIndex: add a,#0x00                  ;The encoded note is only fr
                .endif
 PLY_AKG_Channel1_AfterNoteKnown:
                        .if PLY_CFG_UseTranspositions                  ;CONFIG SPECIFIC
-                               .if PLY_AKG_Rom
+                               .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_Transposition: add a,#0x00           ;Adds the Track transposition.
                                .else
                                 ld b,a
@@ -831,7 +831,7 @@ PLY_AKG_Channel1_Transposition: add a,#0x00           ;Adds the Track transposit
                 ld l,a
                 ld h,#0x00
                 add hl,hl
-               .if PLY_AKG_Rom
+               .ifeq PLY_AKG_Rom
 PLY_AKG_InstrumentsTable: ld de,#0x0000           ;Points on the Instruments table of the music (set on song initialization).
                .else
                         ld de,(PLY_AKG_InstrumentsTable + PLY_AKG_Offset1b)
@@ -879,7 +879,7 @@ PLY_AKG_Channel1_AfterInstrument:
         
                         ;If the "force instrument speed" effect is used, the instrument speed must be reset to its original value.
                        .if PLY_CFG_UseEffect_ForceInstrumentSpeed            ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_InstrumentOriginalSpeed: ld a,#0x00
        .else
         ld a,(PLY_AKG_Channel1_InstrumentOriginalSpeed)
@@ -928,7 +928,7 @@ PLY_AKG_Channel1_ReadCellEnd:
         ;Reads the possible Cell of the Channel 1, 2 and 3. Use a Macro for each channel, but the code is duplicated.
         ;-------------------------------------------------------------------------
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_WaitCounter: ld a,#0x00      ;Lines to wait?
        .else
         ld a,(PLY_AKG_Channel2_WaitCounter)
@@ -940,7 +940,7 @@ PLY_AKG_Channel2_WaitCounter: ld a,#0x00      ;Lines to wait?
         jp PLY_AKG_Channel2_ReadCellEnd
         
 PLY_AKG_Channel2_ReadTrack:
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 
 PLY_AKG_Channel2_PtTrack: ld hl,#0x0000      ;Points on the Cell to read.
        .else
@@ -986,7 +986,7 @@ PLY_AKG_Channel2_Wait:
         ;Little subcode put here, called just below. A bit dirty, but avoids long jump.
 PLY_AKG_Channel2_SameInstrument:
         ;No new instrument. The instrument pointer must be reset.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_PtBaseInstrument: ld de,#0x0000
        .else
         ld de,(PLY_AKG_Channel2_PtBaseInstrument)
@@ -1001,7 +1001,7 @@ PLY_AKG_Channel2_Note:
                 add a,b
 PLY_AKG_Channel2_AfterNoteKnown:
                        .if PLY_CFG_UseTranspositions                  ;CONFIG SPECIFIC
-                               .if PLY_AKG_Rom
+                               .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_Transposition: add a,#0x00           ;Adds the Track transposition.
                                .else
                                 ld b,a
@@ -1065,7 +1065,7 @@ PLY_AKG_Channel2_AfterInstrument:
         
                         ;If the "force instrument speed" effect is used, the instrument speed must be reset to its original value.
                        .if PLY_CFG_UseEffect_ForceInstrumentSpeed            ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_InstrumentOriginalSpeed: ld a,#0x00
        .else
         ld a,(PLY_AKG_Channel2_InstrumentOriginalSpeed)
@@ -1114,7 +1114,7 @@ PLY_AKG_Channel2_ReadCellEnd:
         ;Reads the possible Cell of the Channel 1, 2 and 3. Use a Macro for each channel, but the code is duplicated.
         ;-------------------------------------------------------------------------
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_WaitCounter: ld a,#0x00      ;Lines to wait?
        .else
         ld a,(PLY_AKG_Channel3_WaitCounter)
@@ -1126,7 +1126,7 @@ PLY_AKG_Channel3_WaitCounter: ld a,#0x00      ;Lines to wait?
         jp PLY_AKG_Channel3_ReadCellEnd
         
 PLY_AKG_Channel3_ReadTrack:
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 
 PLY_AKG_Channel3_PtTrack: ld hl,#0x0000      ;Points on the Cell to read.
        .else
@@ -1172,7 +1172,7 @@ PLY_AKG_Channel3_Wait:
         ;Little subcode put here, called just below. A bit dirty, but avoids long jump.
 PLY_AKG_Channel3_SameInstrument:
         ;No new instrument. The instrument pointer must be reset.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_PtBaseInstrument: ld de,#0x0000
        .else
         ld de,(PLY_AKG_Channel3_PtBaseInstrument)
@@ -1187,7 +1187,7 @@ PLY_AKG_Channel3_Note:
                 add a,b
 PLY_AKG_Channel3_AfterNoteKnown:
                        .if PLY_CFG_UseTranspositions                  ;CONFIG SPECIFIC
-                               .if PLY_AKG_Rom
+                               .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_Transposition: add a,#0x00           ;Adds the Track transposition.
                                .else
                                 ld b,a
@@ -1251,7 +1251,7 @@ PLY_AKG_Channel3_AfterInstrument:
         
                         ;If the "force instrument speed" effect is used, the instrument speed must be reset to its original value.
                        .if PLY_CFG_UseEffect_ForceInstrumentSpeed            ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_InstrumentOriginalSpeed: ld a,#0x00
        .else
         ld a,(PLY_AKG_Channel3_InstrumentOriginalSpeed)
@@ -1299,7 +1299,7 @@ PLY_AKG_Channel3_ReadCellEnd:
 
 
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_CurrentSpeed: ld a,#0x00      ;>0.
        .else
         ld a,(PLY_AKG_CurrentSpeed)
@@ -1316,14 +1316,14 @@ PLY_AKG_SetSpeedBeforePlayStreams:
         
         ;Use Volume slide?
         ;----------------------------
-               .if PLY_AKG_Rom
+               .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_InvertedVolumeIntegerAndDecimal: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_Channel1_InvertedVolumeIntegerAndDecimal)
        .endif
 .equ PLY_AKG_Channel1_InvertedVolumeInteger , PLY_AKG_Channel1_InvertedVolumeIntegerAndDecimal + PLY_AKG_Offset1b + 1
                        .if PLY_AKG_UseEffect_VolumeSlide             ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_IsVolumeSlide: or a                   ;Is there a Volume Slide ? Automodified. SCF if yes, OR A if not.
        .else
         ld a,(PLY_AKG_Channel1_IsVolumeSlide)
@@ -1331,7 +1331,7 @@ PLY_AKG_Channel1_IsVolumeSlide: or a                   ;Is there a Volume Slide 
        .endif
         jr nc,PLY_AKG_Channel1_VolumeSlide_End
         
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_VolumeSlideValue: ld de,#0x0000              ;May be negative.
        .else
         ld de,(PLY_AKG_Channel1_VolumeSlideValue)
@@ -1365,7 +1365,7 @@ PLY_AKG_Channel1_VolumeSlide_End:
                        .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
         ld c,#0x00  ;Default value of the arpeggio.
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_IsArpeggioTable: or a                   ;Is there an arpeggio table? Automodified. SCF if yes, OR A if not.
        .else
         ld a,(PLY_AKG_Channel1_IsArpeggioTable)
@@ -1374,7 +1374,7 @@ PLY_AKG_Channel1_IsArpeggioTable: or a                   ;Is there an arpeggio t
         jr nc,PLY_AKG_Channel1_ArpeggioTable_End
 
         ;We can read the Arpeggio table for a new value.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_ArpeggioTable: ld hl,#0x0000                 ;Points on the data, after the header.
        .else
         ld hl,(PLY_AKG_Channel1_ArpeggioTable)
@@ -1398,7 +1398,7 @@ PLY_AKG_Channel1_ArpeggioTable_AfterLoopTest:
         ;Checks the speed. If reached, the pointer can be saved to read a new value next time.
         ld a,(PLY_AKG_Channel1_ArpeggioTableSpeed)
         ld d,a
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_ArpeggioTableCurrentStep: ld a,#0x00
        .else
         ld a,(PLY_AKG_Channel1_ArpeggioTableCurrentStep)
@@ -1424,7 +1424,7 @@ PLY_AKG_Channel1_ArpeggioTable_End:
         
         ld de,#0x0000         ;Default value.
                        .if PLY_CFG_UseEffect_PitchTable              ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_IsPitchTable: or a                   ;Is there an arpeggio table? Automodified. SCF if yes, OR A if not.
        .else
         ld a,(PLY_AKG_Channel1_IsPitchTable)
@@ -1433,7 +1433,7 @@ PLY_AKG_Channel1_IsPitchTable: or a                   ;Is there an arpeggio tabl
         jr nc,PLY_AKG_Channel1_PitchTable_End
         
         ;Read the Pitch table for a value.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_PitchTable: ld sp,#0x0000                 ;Points on the data, after the header.
        .else
         ld sp,(PLY_AKG_Channel1_PitchTable)
@@ -1444,7 +1444,7 @@ PLY_AKG_Channel1_PitchTable: ld sp,#0x0000                 ;Points on the data, 
         ;Checks the speed. If reached, the pointer can be saved (advance in the Pitch).
         ld a,(PLY_AKG_Channel1_PitchTableSpeed)
         ld b,a
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_PitchTableCurrentStep: ld a,#0x00
        .else
         ld a,(PLY_AKG_Channel1_PitchTableCurrentStep)
@@ -1466,9 +1466,9 @@ PLY_AKG_Channel1_PitchTable_End:
         ;Pitch management. The Glide is embedded, but relies on the Pitch (Pitch can exist without Glide, but Glide can not without Pitch).
         ;Do NOT modify C or DE.
         ;------------------------------------------------------------------------------------------
-                       .if PLY_AKS_UseEffect_PitchUpOrDownOrGlide        ;CONFIG SPECIFIC
+                       .ifeq PLY_AKS_UseEffect_PitchUpOrDownOrGlide        ;CONFIG SPECIFIC
                         ld hl,#0x0000 ;No pitch.
-                               .if PLY_AKG_Rom              ;Nothing to declare if ROM.
+                               .ifeq PLY_AKG_Rom              ;Nothing to declare if ROM.
                                 ;Some dirty duplication in case there is no pitch up/down/glide. The "real" vars are a bit below.
 PLY_AKG_Channel1_SoundStream_RelativeModifierAddress:                 ;Put here, no need for better place (see the real label below, with the same name).
                                        .if PLY_AKS_UseEffect_ArpeggioTableOrPitchTable       ;CONFIG SPECIFIC
@@ -1488,7 +1488,7 @@ PLY_AKG_Channel1_AfterArpeggioPitchVariables:
                                        .endif ;PLY_AKS_UseEffect_ArpeggioTableOrPitchTable
                                .endif ;PLY_AKG_ROM       
                        .else ;PLY_AKS_UseEffect_PitchUpOrDownOrGlide
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_Pitch: ld hl,#0x0000
 PLY_AKG_Channel1_IsPitch: or a                          ;Is there a Pitch? Automodified. SCF if yes, OR A if not.
        .else
@@ -1501,14 +1501,14 @@ PLY_AKG_Channel1_IsPitch: or a                          ;Is there a Pitch? Autom
                                .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
        .db #0xdd,#0x69      ;ld ixl,c
                                .endif ;PLY_AKS_UseEffect_Arpeggio
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_PitchTrack: ld bc,#0x0000                    ;Value from the user. ALWAYS POSITIVE. Does not evolve. B is always 0.
        .else
         ld bc,(PLY_AKG_Channel1_PitchTrack)
        .endif
 
         or a                                            ;Required if the code is changed to sbc.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_PitchTrackAddOrSbc_16bits: nop 
         add hl,bc                                       ;WILL BE AUTOMODIFIED to add or sbc. But SBC requires 2*8 bits! Damn.
        .else
@@ -1517,7 +1517,7 @@ PLY_AKG_Channel1_PitchTrackAddOrSbc_16bitsReturn:
        .endif
         
         ;Makes the decimal part evolves.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_PitchTrackDecimalCounter: ld a,#0x00
 PLY_AKG_Channel1_PitchTrackDecimalInstr: add a,#0x00              ;Value from the user. WILL BE AUTOMODIFIED to add or sub.
 .equ PLY_AKG_Channel1_PitchTrackDecimalValue , PLY_AKG_Channel1_PitchTrackDecimalInstr + 1
@@ -1532,7 +1532,7 @@ PLY_AKG_Channel1_PitchTrackDecimalInstrAndValueReturnAfterJp:
         ld (PLY_AKG_Channel1_PitchTrackDecimalCounter + PLY_AKG_Offset1b),a
 
         jr nc,PLY_AKG_Channel1_PitchNoCarry
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_PitchTrackIntegerAddOrSub: inc hl                   ;WILL BE AUTOMODIFIED to inc hl/dec hl
        .else
         jp PLY_AKG_Channel1_PitchTrackIntegerAddOrSub   ;Calls a code that holds the instruction.
@@ -1541,12 +1541,12 @@ PLY_AKG_Channel1_PitchTrackIntegerAddOrSubReturn:
 PLY_AKG_Channel1_PitchNoCarry:
         ld (PLY_AKG_Channel1_Pitch + PLY_AKG_Offset1b),hl
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_SoundStream_RelativeModifierAddress:                   ;This must be placed at the any location to allow reaching the variables via IX/IY.
        .endif
                                .if PLY_CFG_UseEffect_PitchGlide        ;CONFIG SPECIFIC
         ;Glide?
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_GlideDirection: ld a,#0x00         ;0 = no glide. 1 = glide/pitch up. 2 = glide/pitch down.
        .else
         ld a,(PLY_AKG_Channel1_GlideDirection)
@@ -1573,7 +1573,7 @@ PLY_AKG_Channel1_GlideDirection: ld a,#0x00         ;0 = no glide. 1 = glide/pit
         
         add hl,bc                                       ;HL is now the current period (note period + track pitch).
         
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_GlideToReach: ld bc,#0x0000                  ;Period to reach (note given by the user, converted to period).
        .else
         ld bc,(PLY_AKG_Channel1_GlideToReach)
@@ -1607,7 +1607,7 @@ PLY_AKG_Channel1_GlideOver:
         ;Skips the HL restoration, the one we have is fine and will give us the right pitch to use.
         jr PLY_AKG_Channel1_Glide_End
                                .else
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
                 ;Skips the variables below, if there are present.
                                        .if PLY_AKS_UseEffect_ArpeggioTableOrPitchTable       ;CONFIG SPECIFIC
                 jr PLY_AKG_Channel1_AfterArpeggioPitchVariables
@@ -1616,7 +1616,7 @@ PLY_AKG_Channel1_GlideOver:
                                .endif ;PLY_CFG_UseEffect_PitchGlide
         ;A small place to stash some vars which have to be within relative range. Dirty, but no choice.
         ;Note that the vars just below are duplicated due to the conditional assembling (they are a bit above).
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
                                .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
 PLY_AKG_Channel1_ArpeggioTableSpeed: .db 0
 PLY_AKG_Channel1_ArpeggioBaseSpeed: .db 0
@@ -1632,7 +1632,7 @@ PLY_AKG_Channel1_AfterArpeggioPitchVariables:
 
                                .if PLY_CFG_UseEffect_PitchGlide        ;CONFIG SPECIFIC
 PLY_AKG_Channel1_Glide_BeforeEnd:
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_Glide_SaveHL: ld hl,#0x0000               ;Restores HL.
        .else
         ld hl,(PLY_AKG_Channel1_Glide_SaveHL)
@@ -1661,14 +1661,14 @@ PLY_AKG_Channel1_Pitch_End:
         
         ;Use Volume slide?
         ;----------------------------
-               .if PLY_AKG_Rom
+               .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_InvertedVolumeIntegerAndDecimal: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_Channel2_InvertedVolumeIntegerAndDecimal)
        .endif
 .equ PLY_AKG_Channel2_InvertedVolumeInteger , PLY_AKG_Channel2_InvertedVolumeIntegerAndDecimal + PLY_AKG_Offset1b + 1
                        .if PLY_AKG_UseEffect_VolumeSlide             ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_IsVolumeSlide: or a                   ;Is there a Volume Slide ? Automodified. SCF if yes, OR A if not.
        .else
         ld a,(PLY_AKG_Channel2_IsVolumeSlide)
@@ -1676,7 +1676,7 @@ PLY_AKG_Channel2_IsVolumeSlide: or a                   ;Is there a Volume Slide 
        .endif
         jr nc,PLY_AKG_Channel2_VolumeSlide_End
         
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_VolumeSlideValue: ld de,#0x0000              ;May be negative.
        .else
         ld de,(PLY_AKG_Channel2_VolumeSlideValue)
@@ -1710,7 +1710,7 @@ PLY_AKG_Channel2_VolumeSlide_End:
                        .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
         ld c,#0x00  ;Default value of the arpeggio.
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_IsArpeggioTable: or a                   ;Is there an arpeggio table? Automodified. SCF if yes, OR A if not.
        .else
         ld a,(PLY_AKG_Channel2_IsArpeggioTable)
@@ -1719,7 +1719,7 @@ PLY_AKG_Channel2_IsArpeggioTable: or a                   ;Is there an arpeggio t
         jr nc,PLY_AKG_Channel2_ArpeggioTable_End
 
         ;We can read the Arpeggio table for a new value.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_ArpeggioTable: ld hl,#0x0000                 ;Points on the data, after the header.
        .else
         ld hl,(PLY_AKG_Channel2_ArpeggioTable)
@@ -1743,7 +1743,7 @@ PLY_AKG_Channel2_ArpeggioTable_AfterLoopTest:
         ;Checks the speed. If reached, the pointer can be saved to read a new value next time.
         ld a,(PLY_AKG_Channel2_ArpeggioTableSpeed)
         ld d,a
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_ArpeggioTableCurrentStep: ld a,#0x00
        .else
         ld a,(PLY_AKG_Channel2_ArpeggioTableCurrentStep)
@@ -1769,7 +1769,7 @@ PLY_AKG_Channel2_ArpeggioTable_End:
         
         ld de,#0x0000         ;Default value.
                        .if PLY_CFG_UseEffect_PitchTable              ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_IsPitchTable: or a                   ;Is there an arpeggio table? Automodified. SCF if yes, OR A if not.
        .else
         ld a,(PLY_AKG_Channel2_IsPitchTable)
@@ -1778,7 +1778,7 @@ PLY_AKG_Channel2_IsPitchTable: or a                   ;Is there an arpeggio tabl
         jr nc,PLY_AKG_Channel2_PitchTable_End
         
         ;Read the Pitch table for a value.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_PitchTable: ld sp,#0x0000                 ;Points on the data, after the header.
        .else
         ld sp,(PLY_AKG_Channel2_PitchTable)
@@ -1789,7 +1789,7 @@ PLY_AKG_Channel2_PitchTable: ld sp,#0x0000                 ;Points on the data, 
         ;Checks the speed. If reached, the pointer can be saved (advance in the Pitch).
         ld a,(PLY_AKG_Channel2_PitchTableSpeed)
         ld b,a
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_PitchTableCurrentStep: ld a,#0x00
        .else
         ld a,(PLY_AKG_Channel2_PitchTableCurrentStep)
@@ -1811,9 +1811,9 @@ PLY_AKG_Channel2_PitchTable_End:
         ;Pitch management. The Glide is embedded, but relies on the Pitch (Pitch can exist without Glide, but Glide can not without Pitch).
         ;Do NOT modify C or DE.
         ;------------------------------------------------------------------------------------------
-                       .if PLY_AKS_UseEffect_PitchUpOrDownOrGlide        ;CONFIG SPECIFIC
+                       .ifeq PLY_AKS_UseEffect_PitchUpOrDownOrGlide        ;CONFIG SPECIFIC
                         ld hl,#0x0000 ;No pitch.
-                               .if PLY_AKG_Rom              ;Nothing to declare if ROM.
+                               .ifeq PLY_AKG_Rom              ;Nothing to declare if ROM.
                                 ;Some dirty duplication in case there is no pitch up/down/glide. The "real" vars are a bit below.
 PLY_AKG_Channel2_SoundStream_RelativeModifierAddress:                 ;Put here, no need for better place (see the real label below, with the same name).
                                        .if PLY_AKS_UseEffect_ArpeggioTableOrPitchTable       ;CONFIG SPECIFIC
@@ -1833,7 +1833,7 @@ PLY_AKG_Channel2_AfterArpeggioPitchVariables:
                                        .endif ;PLY_AKS_UseEffect_ArpeggioTableOrPitchTable
                                .endif ;PLY_AKG_ROM       
                        .else ;PLY_AKS_UseEffect_PitchUpOrDownOrGlide
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_Pitch: ld hl,#0x0000
 PLY_AKG_Channel2_IsPitch: or a                          ;Is there a Pitch? Automodified. SCF if yes, OR A if not.
        .else
@@ -1846,14 +1846,14 @@ PLY_AKG_Channel2_IsPitch: or a                          ;Is there a Pitch? Autom
                                .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
         .db #0xdd,#0x69      ;ld ixl,c
                                .endif ;PLY_AKS_UseEffect_Arpeggio
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_PitchTrack: ld bc,#0x0000                    ;Value from the user. ALWAYS POSITIVE. Does not evolve. B is always 0.
        .else
         ld bc,(PLY_AKG_Channel2_PitchTrack)
        .endif
 
         or a                                            ;Required if the code is changed to sbc.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_PitchTrackAddOrSbc_16bits: nop 
         add hl,bc                                       ;WILL BE AUTOMODIFIED to add or sbc. But SBC requires 2*8 bits! Damn.
        .else
@@ -1862,7 +1862,7 @@ PLY_AKG_Channel2_PitchTrackAddOrSbc_16bitsReturn:
        .endif
         
         ;Makes the decimal part evolves.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_PitchTrackDecimalCounter: ld a,#0x00
 PLY_AKG_Channel2_PitchTrackDecimalInstr: add a,#0x00              ;Value from the user. WILL BE AUTOMODIFIED to add or sub.
 .equ PLY_AKG_Channel2_PitchTrackDecimalValue , PLY_AKG_Channel2_PitchTrackDecimalInstr + 1
@@ -1877,7 +1877,7 @@ PLY_AKG_Channel2_PitchTrackDecimalInstrAndValueReturnAfterJp:
         ld (PLY_AKG_Channel2_PitchTrackDecimalCounter + PLY_AKG_Offset1b),a
 
         jr nc,PLY_AKG_Channel2_PitchNoCarry
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_PitchTrackIntegerAddOrSub: inc hl                   ;WILL BE AUTOMODIFIED to inc hl/dec hl
        .else
         jp PLY_AKG_Channel2_PitchTrackIntegerAddOrSub   ;Calls a code that holds the instruction.
@@ -1886,12 +1886,12 @@ PLY_AKG_Channel2_PitchTrackIntegerAddOrSubReturn:
 PLY_AKG_Channel2_PitchNoCarry:
         ld (PLY_AKG_Channel2_Pitch + PLY_AKG_Offset1b),hl
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_SoundStream_RelativeModifierAddress:                   ;This must be placed at the any location to allow reaching the variables via IX/IY.
        .endif
                                .if PLY_CFG_UseEffect_PitchGlide        ;CONFIG SPECIFIC
         ;Glide?
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_GlideDirection: ld a,#0x00         ;0 = no glide. 1 = glide/pitch up. 2 = glide/pitch down.
        .else
         ld a,(PLY_AKG_Channel2_GlideDirection)
@@ -1918,7 +1918,7 @@ PLY_AKG_Channel2_GlideDirection: ld a,#0x00         ;0 = no glide. 1 = glide/pit
         
         add hl,bc                                       ;HL is now the current period (note period + track pitch).
         
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_GlideToReach: ld bc,#0x0000                  ;Period to reach (note given by the user, converted to period).
        .else
         ld bc,(PLY_AKG_Channel2_GlideToReach)
@@ -1952,7 +1952,7 @@ PLY_AKG_Channel2_GlideOver:
         ;Skips the HL restoration, the one we have is fine and will give us the right pitch to use.
         jr PLY_AKG_Channel2_Glide_End
                                .else
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
                 ;Skips the variables below, if there are present.
                                        .if PLY_AKS_UseEffect_ArpeggioTableOrPitchTable       ;CONFIG SPECIFIC
                 jr PLY_AKG_Channel2_AfterArpeggioPitchVariables
@@ -1961,7 +1961,7 @@ PLY_AKG_Channel2_GlideOver:
                                .endif ;PLY_CFG_UseEffect_PitchGlide
         ;A small place to stash some vars which have to be within relative range. Dirty, but no choice.
         ;Note that the vars just below are duplicated due to the conditional assembling (they are a bit above).
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
                                .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
 PLY_AKG_Channel2_ArpeggioTableSpeed: .db 0
 PLY_AKG_Channel2_ArpeggioBaseSpeed: .db 0
@@ -1977,7 +1977,7 @@ PLY_AKG_Channel2_AfterArpeggioPitchVariables:
 
                                .if PLY_CFG_UseEffect_PitchGlide        ;CONFIG SPECIFIC
 PLY_AKG_Channel2_Glide_BeforeEnd:
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_Glide_SaveHL: ld hl,#0x0000               ;Restores HL.
        .else
         ld hl,(PLY_AKG_Channel2_Glide_SaveHL)
@@ -2006,14 +2006,14 @@ PLY_AKG_Channel2_Pitch_End:
         
         ;Use Volume slide?
         ;----------------------------
-               .if PLY_AKG_Rom
+               .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_InvertedVolumeIntegerAndDecimal: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_Channel3_InvertedVolumeIntegerAndDecimal)
        .endif
 .equ PLY_AKG_Channel3_InvertedVolumeInteger , PLY_AKG_Channel3_InvertedVolumeIntegerAndDecimal + PLY_AKG_Offset1b + 1
                        .if PLY_AKG_UseEffect_VolumeSlide             ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_IsVolumeSlide: or a                   ;Is there a Volume Slide ? Automodified. SCF if yes, OR A if not.
        .else
         ld a,(PLY_AKG_Channel3_IsVolumeSlide)
@@ -2021,7 +2021,7 @@ PLY_AKG_Channel3_IsVolumeSlide: or a                   ;Is there a Volume Slide 
        .endif
         jr nc,PLY_AKG_Channel3_VolumeSlide_End
         
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_VolumeSlideValue: ld de,#0x0000              ;May be negative.
        .else
         ld de,(PLY_AKG_Channel3_VolumeSlideValue)
@@ -2055,7 +2055,7 @@ PLY_AKG_Channel3_VolumeSlide_End:
                        .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
         ld c,#0x00  ;Default value of the arpeggio.
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_IsArpeggioTable: or a                   ;Is there an arpeggio table? Automodified. SCF if yes, OR A if not.
        .else
         ld a,(PLY_AKG_Channel3_IsArpeggioTable)
@@ -2064,7 +2064,7 @@ PLY_AKG_Channel3_IsArpeggioTable: or a                   ;Is there an arpeggio t
         jr nc,PLY_AKG_Channel3_ArpeggioTable_End
 
         ;We can read the Arpeggio table for a new value.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_ArpeggioTable: ld hl,#0x0000                 ;Points on the data, after the header.
        .else
         ld hl,(PLY_AKG_Channel3_ArpeggioTable)
@@ -2088,7 +2088,7 @@ PLY_AKG_Channel3_ArpeggioTable_AfterLoopTest:
         ;Checks the speed. If reached, the pointer can be saved to read a new value next time.
         ld a,(PLY_AKG_Channel3_ArpeggioTableSpeed)
         ld d,a
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_ArpeggioTableCurrentStep: ld a,#0x00
        .else
         ld a,(PLY_AKG_Channel3_ArpeggioTableCurrentStep)
@@ -2114,7 +2114,7 @@ PLY_AKG_Channel3_ArpeggioTable_End:
         
         ld de,#0x0000         ;Default value.
                        .if PLY_CFG_UseEffect_PitchTable              ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_IsPitchTable: or a                   ;Is there an arpeggio table? Automodified. SCF if yes, OR A if not.
        .else
         ld a,(PLY_AKG_Channel3_IsPitchTable)
@@ -2123,7 +2123,7 @@ PLY_AKG_Channel3_IsPitchTable: or a                   ;Is there an arpeggio tabl
         jr nc,PLY_AKG_Channel3_PitchTable_End
         
         ;Read the Pitch table for a value.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_PitchTable: ld sp,#0x0000                 ;Points on the data, after the header.
        .else
         ld sp,(PLY_AKG_Channel3_PitchTable)
@@ -2134,7 +2134,7 @@ PLY_AKG_Channel3_PitchTable: ld sp,#0x0000                 ;Points on the data, 
         ;Checks the speed. If reached, the pointer can be saved (advance in the Pitch).
         ld a,(PLY_AKG_Channel3_PitchTableSpeed)
         ld b,a
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_PitchTableCurrentStep: ld a,#0x00
        .else
         ld a,(PLY_AKG_Channel3_PitchTableCurrentStep)
@@ -2156,9 +2156,9 @@ PLY_AKG_Channel3_PitchTable_End:
         ;Pitch management. The Glide is embedded, but relies on the Pitch (Pitch can exist without Glide, but Glide can not without Pitch).
         ;Do NOT modify C or DE.
         ;------------------------------------------------------------------------------------------
-                       .if PLY_AKS_UseEffect_PitchUpOrDownOrGlide        ;CONFIG SPECIFIC
+                       .ifeq PLY_AKS_UseEffect_PitchUpOrDownOrGlide        ;CONFIG SPECIFIC
                         ld hl,#0x0000 ;No pitch.
-                               .if PLY_AKG_Rom              ;Nothing to declare if ROM.
+                               .ifeq PLY_AKG_Rom              ;Nothing to declare if ROM.
                                 ;Some dirty duplication in case there is no pitch up/down/glide. The "real" vars are a bit below.
 PLY_AKG_Channel3_SoundStream_RelativeModifierAddress:                 ;Put here, no need for better place (see the real label below, with the same name).
                                        .if PLY_AKS_UseEffect_ArpeggioTableOrPitchTable       ;CONFIG SPECIFIC
@@ -2178,7 +2178,7 @@ PLY_AKG_Channel3_AfterArpeggioPitchVariables:
                                        .endif ;PLY_AKS_UseEffect_ArpeggioTableOrPitchTable
                                .endif ;PLY_AKG_ROM       
                        .else ;PLY_AKS_UseEffect_PitchUpOrDownOrGlide
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_Pitch: ld hl,#0x0000
 PLY_AKG_Channel3_IsPitch: or a                          ;Is there a Pitch? Automodified. SCF if yes, OR A if not.
        .else
@@ -2191,14 +2191,14 @@ PLY_AKG_Channel3_IsPitch: or a                          ;Is there a Pitch? Autom
                                .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
         .db #0xdd,#0x69      ;ld ixl,c
                                .endif ;PLY_AKS_UseEffect_Arpeggio
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_PitchTrack: ld bc,#0x0000                    ;Value from the user. ALWAYS POSITIVE. Does not evolve. B is always 0.
        .else
         ld bc,(PLY_AKG_Channel3_PitchTrack)
        .endif
 
         or a                                            ;Required if the code is changed to sbc.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_PitchTrackAddOrSbc_16bits: nop 
         add hl,bc                                       ;WILL BE AUTOMODIFIED to add or sbc. But SBC requires 2*8 bits! Damn.
        .else
@@ -2207,7 +2207,7 @@ PLY_AKG_Channel3_PitchTrackAddOrSbc_16bitsReturn:
        .endif
         
         ;Makes the decimal part evolves.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_PitchTrackDecimalCounter: ld a,#0x00
 PLY_AKG_Channel3_PitchTrackDecimalInstr: add a,#0x00              ;Value from the user. WILL BE AUTOMODIFIED to add or sub.
 .equ PLY_AKG_Channel3_PitchTrackDecimalValue , PLY_AKG_Channel3_PitchTrackDecimalInstr + 1
@@ -2222,7 +2222,7 @@ PLY_AKG_Channel3_PitchTrackDecimalInstrAndValueReturnAfterJp:
         ld (PLY_AKG_Channel3_PitchTrackDecimalCounter + PLY_AKG_Offset1b),a
 
         jr nc,PLY_AKG_Channel3_PitchNoCarry
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_PitchTrackIntegerAddOrSub: inc hl                   ;WILL BE AUTOMODIFIED to inc hl/dec hl
        .else
         jp PLY_AKG_Channel3_PitchTrackIntegerAddOrSub   ;Calls a code that holds the instruction.
@@ -2231,12 +2231,12 @@ PLY_AKG_Channel3_PitchTrackIntegerAddOrSubReturn:
 PLY_AKG_Channel3_PitchNoCarry:
         ld (PLY_AKG_Channel3_Pitch + PLY_AKG_Offset1b),hl
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_SoundStream_RelativeModifierAddress:                   ;This must be placed at the any location to allow reaching the variables via IX/IY.
        .endif
                                .if PLY_CFG_UseEffect_PitchGlide        ;CONFIG SPECIFIC
         ;Glide?
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_GlideDirection: ld a,#0x00         ;0 = no glide. 1 = glide/pitch up. 2 = glide/pitch down.
        .else
         ld a,(PLY_AKG_Channel3_GlideDirection)
@@ -2263,7 +2263,7 @@ PLY_AKG_Channel3_GlideDirection: ld a,#0x00         ;0 = no glide. 1 = glide/pit
         
         add hl,bc                                       ;HL is now the current period (note period + track pitch).
         
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_GlideToReach: ld bc,#0x0000                  ;Period to reach (note given by the user, converted to period).
        .else
         ld bc,(PLY_AKG_Channel3_GlideToReach)
@@ -2297,7 +2297,7 @@ PLY_AKG_Channel3_GlideOver:
         ;Skips the HL restoration, the one we have is fine and will give us the right pitch to use.
         jr PLY_AKG_Channel3_Glide_End
                                .else
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
                 ;Skips the variables below, if there are present.
                                        .if PLY_AKS_UseEffect_ArpeggioTableOrPitchTable       ;CONFIG SPECIFIC
                 jr PLY_AKG_Channel3_AfterArpeggioPitchVariables
@@ -2306,7 +2306,7 @@ PLY_AKG_Channel3_GlideOver:
                                .endif ;PLY_CFG_UseEffect_PitchGlide
         ;A small place to stash some vars which have to be within relative range. Dirty, but no choice.
         ;Note that the vars just below are duplicated due to the conditional assembling (they are a bit above).
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
                                .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
 PLY_AKG_Channel3_ArpeggioTableSpeed: .db 0
 PLY_AKG_Channel3_ArpeggioBaseSpeed: .db 0
@@ -2322,7 +2322,7 @@ PLY_AKG_Channel3_AfterArpeggioPitchVariables:
 
                                .if PLY_CFG_UseEffect_PitchGlide        ;CONFIG SPECIFIC
 PLY_AKG_Channel3_Glide_BeforeEnd:
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_Glide_SaveHL: ld hl,#0x0000               ;Restores HL.
        .else
         ld hl,(PLY_AKG_Channel3_Glide_SaveHL)
@@ -2368,18 +2368,18 @@ PLY_AKG_Channel3_Pitch_End:
 ;-------------------------------------------------------------------------------------     
         
         ;Generates the code for all channels using the macro above.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_PlayInstrument_RelativeModifierAddress:                   ;This must be placed at the any location to allow reaching the variables via IX/IY.
        .endif
         
         ;What note to play?
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_GeneratedCurrentPitch: ld hl,#0x0000 ;The pitch to add to the real note, according to the Pitch Table + Pitch/Glide effect.
        .else
         ld hl,(PLY_AKG_Channel1_GeneratedCurrentPitch)
        .endif
                        .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_TrackNote: ld a,#0x00
 PLY_AKG_Channel1_GeneratedCurrentArpNote: add a,#0x00                           ;Adds the arpeggio value.
        .else
@@ -2391,7 +2391,7 @@ PLY_AKG_Channel1_GeneratedCurrentArpNote: add a,#0x00                           
                 ld e,a
                 ld d,#0x00
                        .else ;PLY_AKS_UseEffect_Arpeggio
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_TrackNote: ld de,#0x0000               ;Not automodified, stays this way.
        .else
         ld a,(PLY_AKG_Channel1_TrackNote)        ;In ROM, MUST pass by a variable anyway to be analog to if Arpeggio is used (see above).
@@ -2400,7 +2400,7 @@ PLY_AKG_Channel1_TrackNote: ld de,#0x0000               ;Not automodified, stays
        .endif
                        .endif ;PLY_AKS_UseEffect_Arpeggio
         exx
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_InstrumentStep: .db #0xfd,#0x2e,#0x00      ;ld iyl,0
 PLY_AKG_Channel1_PtInstrument: ld hl,#0x0000       ;Instrument data to read (past the header).
 PLY_AKG_Channel1_GeneratedCurrentInvertedVolume: ld de,#0b11100000 * 256 + 15             ;R7, shift twice TO THE LEFT. By default, the noise is cut (111), the sound is on (most usual case).
@@ -2428,7 +2428,7 @@ PLY_AKG_Channel1_GeneratedCurrentInvertedVolume: ld de,#0b11100000 * 256 + 15   
        .endif
        .db #0xfd,#0x7d      ;ld a,iyl
         inc a
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel1_InstrumentSpeed: cp #0x00          ;(>0)
        .else
         cp b
@@ -2458,18 +2458,18 @@ PLY_AKG_Channel1_SetInstrumentStep:
         exx
                         ld (PLY_AKG_PSGReg01_Instr + PLY_AKG_Offset1b),hl
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_PlayInstrument_RelativeModifierAddress:                   ;This must be placed at the any location to allow reaching the variables via IX/IY.
        .endif
         
         ;What note to play?
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_GeneratedCurrentPitch: ld hl,#0x0000 ;The pitch to add to the real note, according to the Pitch Table + Pitch/Glide effect.
        .else
         ld hl,(PLY_AKG_Channel2_GeneratedCurrentPitch)
        .endif
                        .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_TrackNote: ld a,#0x00
 PLY_AKG_Channel2_GeneratedCurrentArpNote: add a,#0x00                           ;Adds the arpeggio value.
        .else
@@ -2481,7 +2481,7 @@ PLY_AKG_Channel2_GeneratedCurrentArpNote: add a,#0x00                           
                 ld e,a
                 ld d,#0x00
                        .else ;PLY_AKS_UseEffect_Arpeggio
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_TrackNote: ld de,#0x0000               ;Not automodified, stays this way.
        .else
         ld a,(PLY_AKG_Channel2_TrackNote)        ;In ROM, MUST pass by a variable anyway to be analog to if Arpeggio is used (see above).
@@ -2490,7 +2490,7 @@ PLY_AKG_Channel2_TrackNote: ld de,#0x0000               ;Not automodified, stays
        .endif
                        .endif ;PLY_AKS_UseEffect_Arpeggio
         exx
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_InstrumentStep: .db #0xfd,#0x2e,#0x00      ;ld iyl,0
 PLY_AKG_Channel2_PtInstrument: ld hl,#0x0000       ;Instrument data to read (past the header).
 
@@ -2518,7 +2518,7 @@ PLY_AKG_Channel2_GeneratedCurrentInvertedVolume: ld e,#0x0f
        .endif
        .db #0xfd,#0x7d      ;ld a,iyl
         inc a
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel2_InstrumentSpeed: cp #0x00          ;(>0)
        .else
         cp b
@@ -2549,18 +2549,18 @@ PLY_AKG_Channel2_SetInstrumentStep:
         exx
                         ld (PLY_AKG_PSGReg23_Instr + PLY_AKG_Offset1b),hl
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_PlayInstrument_RelativeModifierAddress:                   ;This must be placed at the any location to allow reaching the variables via IX/IY.
        .endif
         
         ;What note to play?
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_GeneratedCurrentPitch: ld hl,#0x0000 ;The pitch to add to the real note, according to the Pitch Table + Pitch/Glide effect.
        .else
         ld hl,(PLY_AKG_Channel3_GeneratedCurrentPitch)
        .endif
                        .if PLY_AKS_UseEffect_Arpeggio        ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_TrackNote: ld a,#0x00
 PLY_AKG_Channel3_GeneratedCurrentArpNote: add a,#0x00                           ;Adds the arpeggio value.
        .else
@@ -2572,7 +2572,7 @@ PLY_AKG_Channel3_GeneratedCurrentArpNote: add a,#0x00                           
                 ld e,a
                 ld d,#0x00
                        .else ;PLY_AKS_UseEffect_Arpeggio
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_TrackNote: ld de,#0x0000               ;Not automodified, stays this way.
        .else
         ld a,(PLY_AKG_Channel3_TrackNote)        ;In ROM, MUST pass by a variable anyway to be analog to if Arpeggio is used (see above).
@@ -2581,7 +2581,7 @@ PLY_AKG_Channel3_TrackNote: ld de,#0x0000               ;Not automodified, stays
        .endif
                        .endif ;PLY_AKS_UseEffect_Arpeggio
         exx
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_InstrumentStep: .db #0xfd,#0x2e,#0x00      ;ld iyl,0
 PLY_AKG_Channel3_PtInstrument: ld hl,#0x0000       ;Instrument data to read (past the header).
 
@@ -2609,7 +2609,7 @@ PLY_AKG_Channel3_GeneratedCurrentInvertedVolume: ld e,#0x0f
        .endif
        .db #0xfd,#0x7d      ;ld a,iyl
         inc a
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel3_InstrumentSpeed: cp #0x00          ;(>0)
        .else
         cp b
@@ -2754,7 +2754,7 @@ PLY_AKG_PSGReg13_OldValue: cp #0xff
         ld bc,#0xf401                     ;C is the PSG register.
 
         ;Register 0 and 1.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg01_Instr: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_PSGReg01_Instr)
@@ -2780,7 +2780,7 @@ PLY_AKG_PSGReg01_Instr: ld hl,#0x0000
         exx
      
         ;Register 2 and 3.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg23_Instr: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_PSGReg23_Instr)
@@ -2808,7 +2808,7 @@ PLY_AKG_PSGReg23_Instr: ld hl,#0x0000
         exx
         
         ;Register 4 and 5.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg45_Instr: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_PSGReg45_Instr)
@@ -2837,7 +2837,7 @@ PLY_AKG_PSGReg45_Instr: ld hl,#0x0000
         
         ;Register 6.
                        .if PLY_AKG_Use_NoiseRegister         ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg6_8_Instr: ld hl,#0x0000          ;L is R6, H is R8. Faster to set a 16 bits register than 2 8-bit.
 .equ PLY_AKG_PSGReg6 , PLY_AKG_PSGReg6_8_Instr + 1
 .equ PLY_AKG_PSGReg8 , PLY_AKG_PSGReg6_8_Instr + 2
@@ -2856,7 +2856,7 @@ PLY_AKG_PSGReg6_8_Instr: ld hl,#0x0000          ;L is R6, H is R8. Faster to set
         exx
                        .else
                 ;No noise. But R8 must still be set.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg8_Instr: ld h,#0x00
 .equ PLY_AKG_PSGReg8 , PLY_AKG_PSGReg8_Instr + 1
        .else
@@ -2889,7 +2889,7 @@ PLY_AKG_PSGReg8_Instr: ld h,#0x00
                 out (c),e               ;#f6c0.
         exx
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg9_10_Instr: ld hl,#0x0000          ;L is R9, H is R10. Faster to set a 16 bits register than 2 8-bit.
 .equ PLY_AKG_PSGReg9 , PLY_AKG_PSGReg9_10_Instr + 1
 .equ PLY_AKG_PSGReg10 , PLY_AKG_PSGReg9_10_Instr + 2
@@ -2922,7 +2922,7 @@ PLY_AKG_PSGReg9_10_Instr: ld hl,#0x0000          ;L is R9, H is R10. Faster to s
         
                        .if PLY_CFG_UseHardwareSounds         ;CONFIG SPECIFIC
         ;Register 11 and 12.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGHardwarePeriod_Instr: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_PSGHardwarePeriod_Instr)
@@ -2959,7 +2959,7 @@ PLY_AKG_PSGHardwarePeriod_Instr: ld hl,#0x0000
         ld a,#0x01          ;Register.
         
         ;Register 0 and 1.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg01_Instr: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_PSGReg01_Instr)
@@ -2975,7 +2975,7 @@ PLY_AKG_PSGReg01_Instr: ld hl,#0x0000
         ld b,e
       
         ;Register 2 and 3.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg23_Instr: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_PSGReg23_Instr)
@@ -2993,7 +2993,7 @@ PLY_AKG_PSGReg23_Instr: ld hl,#0x0000
         ld b,e
         
         ;Register 4 and 5.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg45_Instr: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_PSGReg45_Instr)
@@ -3012,7 +3012,7 @@ PLY_AKG_PSGReg45_Instr: ld hl,#0x0000
         
         ;Register 6.
                        .if PLY_AKG_Use_NoiseRegister         ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg6_8_Instr: ld hl,#0x0000          ;L is R6, H is R8. Faster to set a 16 bits register than 2 8-bit.
 .equ PLY_AKG_PSGReg6 , PLY_AKG_PSGReg6_8_Instr + 1
 .equ PLY_AKG_PSGReg8 , PLY_AKG_PSGReg6_8_Instr + 2
@@ -3026,7 +3026,7 @@ PLY_AKG_PSGReg6_8_Instr: ld hl,#0x0000          ;L is R6, H is R8. Faster to set
         ld b,e
                        .else
                 ;No noise. But R8 must still be set.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg8_Instr: ld h,#0x00
 .equ PLY_AKG_PSGReg8 , PLY_AKG_PSGReg8_Instr + 1
        .else
@@ -3052,7 +3052,7 @@ PLY_AKG_PSGReg8_Instr: ld h,#0x00
         ld b,e
         
         ;Register 9 and 10.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg9_10_Instr: ld hl,#0x0000
 .equ PLY_AKG_PSGReg9 , PLY_AKG_PSGReg9_10_Instr + 1
 .equ PLY_AKG_PSGReg10 , PLY_AKG_PSGReg9_10_Instr + 2
@@ -3073,7 +3073,7 @@ PLY_AKG_PSGReg9_10_Instr: ld hl,#0x0000
         
                        .if PLY_CFG_UseHardwareSounds         ;CONFIG SPECIFIC
         ;Register 11 and 12.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGHardwarePeriod_Instr: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_PSGHardwarePeriod_Instr)
@@ -3100,7 +3100,7 @@ PLY_AKG_PSGHardwarePeriod_Instr: ld hl,#0x0000
         ld a,b
         out (#0xa1),a     ;Value.
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
        
 PLY_AKG_PSGReg01_Instr: ld hl,#0x0000
        .else
@@ -3116,7 +3116,7 @@ PLY_AKG_PSGReg01_Instr: ld hl,#0x0000
         ld a,h
         out (#0xa1),a     ;Value.
         
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg23_Instr: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_PSGReg23_Instr)
@@ -3131,7 +3131,7 @@ PLY_AKG_PSGReg23_Instr: ld hl,#0x0000
         ld a,h
         out (#0xa1),a     ;Value.
         
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg45_Instr: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_PSGReg45_Instr)
@@ -3148,7 +3148,7 @@ PLY_AKG_PSGReg45_Instr: ld hl,#0x0000
         
         ;Register 6.
                        .if PLY_AKG_Use_NoiseRegister         ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg6_8_Instr: ld hl,#0x0000          ;L is R6, H is R8. Faster to set a 16 bits register than 2 8-bit.
 .equ PLY_AKG_PSGReg6 , PLY_AKG_PSGReg6_8_Instr + 1
 .equ PLY_AKG_PSGReg8 , PLY_AKG_PSGReg6_8_Instr + 2
@@ -3168,7 +3168,7 @@ PLY_AKG_PSGReg6_8_Instr: ld hl,#0x0000          ;L is R6, H is R8. Faster to set
                 ;No noise. Takes care of R8.
                 ld a,#0x08
                 out (#0xa0),a     ;Register.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg8_Instr: ld a,#0x00
 .equ PLY_AKG_PSGReg8 , PLY_AKG_PSGReg8_Instr + 1
        .else
@@ -3178,7 +3178,7 @@ PLY_AKG_PSGReg8_Instr: ld a,#0x00
                        .endif ;PLY_AKG_Use_NoiseRegister
         
         ;Register 9 and 10.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg9_10_Instr: ld hl,#0x0000
 .equ PLY_AKG_PSGReg9 , PLY_AKG_PSGReg9_10_Instr + 1
 .equ PLY_AKG_PSGReg10 , PLY_AKG_PSGReg9_10_Instr + 2
@@ -3197,7 +3197,7 @@ PLY_AKG_PSGReg9_10_Instr: ld hl,#0x0000
         
                        .if PLY_CFG_UseHardwareSounds         ;CONFIG SPECIFIC
         ;Register 11 and 12.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGHardwarePeriod_Instr: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_PSGHardwarePeriod_Instr)
@@ -3215,7 +3215,7 @@ PLY_AKG_PSGHardwarePeriod_Instr: ld hl,#0x0000
         
        .endif
         
-      .if PLY_AKG_HARDWARE_ENTERPRISE
+      .ifeq PLY_AKG_HARDWARE_ENTERPRISE
                        .if PLY_CFG_UseHardwareSounds         ;CONFIG SPECIFIC
         ;R13.
        .if PLY_AKG_HARDWARE_MSX
@@ -3228,7 +3228,7 @@ PLY_AKG_PSGHardwarePeriod_Instr: ld hl,#0x0000
        .endif
        
                                .if PLY_CFG_UseRetrig         ;CONFIG SPECIFIC
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg13_OldValue: ld a,#0xff
 PLY_AKG_Retrig: or #0x00                    ;0 = no retrig. Else, should be >0xf to be sure the old value becomes a sentinel (i.e. unreachable) value.
 PLY_AKG_PSGReg13_Instr: ld l,#0x00          ;Register 13.
@@ -3245,7 +3245,7 @@ PLY_AKG_PSGReg13_Instr: ld l,#0x00          ;Register 13.
         ;Different R13.
         ld a,l
                                .else ;PLY_CFG_UseRetrig
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PSGReg13_Instr: ld a,#0x00          ;Register 13.
 PLY_AKG_PSGReg13_OldValue: cp #0xff
        .else
@@ -3285,7 +3285,7 @@ PLY_AKG_PSGReg13_OldValue: cp #0xff
                                .endif ;PLY_CFG_UseRetrig
 PLY_AKG_PSGReg13_End:
                        .endif ;PLY_CFG_UseHardwareSounds
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_SaveSP: ld sp,#0x0000
        .else
         ld sp,(PLY_AKG_SaveSp)
@@ -3298,7 +3298,7 @@ PLY_AKG_Channel1_MaybeEffects:
         ;There is one wait in all cases.
         ;xor a                  ;A is supposed to be 0.
         ld (PLY_AKG_Channel1_WaitCounter + PLY_AKG_Offset1b),a
-                       .if PLY_CFG_UseEffects                ;CONFIG SPECIFIC
+                       .ifeq PLY_CFG_UseEffects                ;CONFIG SPECIFIC
         jp PLY_AKG_Channel1_BeforeEnd_StoreCellPointer
                        .else
         bit 6,c         ;Effects?
@@ -3321,7 +3321,7 @@ PLY_AKG_Channel2_MaybeEffects:
         ;There is one wait in all cases.
         ;xor a                  ;A is supposed to be 0.
         ld (PLY_AKG_Channel2_WaitCounter + PLY_AKG_Offset1b),a
-                       .if PLY_CFG_UseEffects                ;CONFIG SPECIFIC
+                       .ifeq PLY_CFG_UseEffects                ;CONFIG SPECIFIC
         jp PLY_AKG_Channel2_BeforeEnd_StoreCellPointer
                        .else
         bit 6,c         ;Effects?
@@ -3344,7 +3344,7 @@ PLY_AKG_Channel3_MaybeEffects:
         ;There is one wait in all cases.
         ;xor a                  ;A is supposed to be 0.
         ld (PLY_AKG_Channel3_WaitCounter + PLY_AKG_Offset1b),a
-                       .if PLY_CFG_UseEffects                ;CONFIG SPECIFIC
+                       .ifeq PLY_CFG_UseEffects                ;CONFIG SPECIFIC
         jp PLY_AKG_Channel3_BeforeEnd_StoreCellPointer
                        .else
         bit 6,c         ;Effects?
@@ -3373,7 +3373,7 @@ PLY_AKG_Channel3_ReadEffectsEnd:
 ;OUT:   HL = Points after on the effect blocks
 PLY_AKG_Channel_ReadEffects:
         
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
                 ld (PLY_AKG_Channel_ReadEffects_EndJump + PLY_AKG_Offset1b),de
        .else
                 ld (PLY_AKG_Channel_ReadEffects_EndJumpInstrAndAddress + 1),de
@@ -3391,7 +3391,7 @@ PLY_AKG_Channel_ReadEffects:
                 ld l,a
                 ld h,#0x00
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel_ReadEffects_EffectBlocks1: ld de,#0x0000
        .else
         ld de,(PLY_AKG_Channel_ReadEffects_EffectBlocks1)
@@ -3417,7 +3417,7 @@ PLY_AKG_Channel_RE_EffectAddressKnown:
                 ;All the effects return here.
 PLY_AKG_Channel_RE_EffectReturn:
                 ;Is there another effect?
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel_RE_ReadNextEffectInBlock: ld a,#0x00                ;Bit 0 indicates whether there are more effects.
        .else
                 ld a,(PLY_AKG_Channel_RE_ReadNextEffectInBlock)
@@ -3429,7 +3429,7 @@ PLY_AKG_Channel_RE_ReadNextEffectInBlock: ld a,#0x00                ;Bit 0 indic
         
         ;Put back in HL the point on the Track Cells.
         ex de,hl
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel_ReadEffects_EndJump: jp 0        ;PLY_AKG_Channel1/2/3_BeforeEnd_StoreCellPointer
        .else
         jp PLY_AKG_Channel_ReadEffects_EndJumpInstrAndAddress
@@ -3444,7 +3444,7 @@ PLY_AKG_Channel_ReadEffects_RelativeAddress:
         inc de
         exx
                 ld l,a
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Channel_ReadEffects_EffectBlocks2: ld de,#0x0000
        .else
         ld de,(PLY_AKG_Channel_ReadEffects_EffectBlocks1)       ;In ROM, reads the first value, it is the same. Duplicating it is only an optimization for RAM player to avoid reading memory.
@@ -3493,7 +3493,7 @@ PLY_AKG_ReadInstrumentCell:
         jp c,PLY_AKG_S_Or_H_Or_SaH_Or_EndWithLoop
         ;No Soft No Hard, or Soft To Hard, or Hard To Soft, or End without loop.
         rra
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
                 jr c,PLY_AKG_StH_Or_EndWithoutLoop
        .else
                 jp c,PLY_AKG_StH_Or_EndWithoutLoop
@@ -3596,7 +3596,7 @@ PLY_AKG_HardToSoft:
         call PLY_AKG_StoH_HToS_SandH_Common
         ;We have the ratio jump calculated and the primary period too. It must be divided to get the software frequency.
         
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
         ld (PLY_AKG_HS_JumpRatio + 1),a
        .else
         ;Stores where to jump after the JumpRatio label. Only BC' is free...
@@ -3618,7 +3618,7 @@ PLY_AKG_HardToSoft:
         exx
                 ;The hardware period can be stored.
                 ld (PLY_AKG_PSGHardwarePeriod_Instr + PLY_AKG_Offset1b),hl
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_HS_JumpRatio: jr . + 2               ;Automodified by the line above to jump on the right code.
        .else
                 jp PLY_AKG_TempPlayInstrumentJumpInstrAndAddress        ;If ROM, jumps to the buffer, it will jump back just after according to the ratio.
@@ -3669,7 +3669,7 @@ PLY_AKG_SH_NoSoftwarePitchShift:
         ;-------------------------------------------------
 PLY_AKG_EndWithoutLoop:
         ;Loops to the "empty" instrument, and makes another iteration.
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_EmptyInstrumentDataPt: ld hl,#0x0000
        .else
         ld hl,(PLY_AKG_EmptyInstrumentDataPt)
@@ -3678,7 +3678,7 @@ PLY_AKG_EmptyInstrumentDataPt: ld hl,#0x0000
         inc hl
         xor a
         ld b,a
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
                 jr PLY_AKG_NoSoftNoHard
        .else
                 jp PLY_AKG_NoSoftNoHard
@@ -3689,7 +3689,7 @@ PLY_AKG_EmptyInstrumentDataPt: ld hl,#0x0000
         ;-----------------------------------------
 PLY_AKG_StH_Or_EndWithoutLoop:
         rra
-                       .if PLY_CFG_SoftToHard                ;CONFIG SPECIFIC
+                       .ifeq PLY_CFG_SoftToHard                ;CONFIG SPECIFIC
         jr PLY_AKG_EndWithoutLoop
                        .else
         jr c,PLY_AKG_EndWithoutLoop
@@ -3701,7 +3701,7 @@ PLY_AKG_StH_Or_EndWithoutLoop:
         call PLY_AKG_StoH_HToS_SandH_Common
         ;We have the ratio jump calculated and the primary period too. It must be divided to get the hardware frequency.
 
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
         ld (PLY_AKG_SH_JumpRatio + 1),a
        .else
         ;Stores where to jump after the JumpRatio label. Only BC' is free...
@@ -3724,7 +3724,7 @@ PLY_AKG_StH_Or_EndWithoutLoop:
                 ;Saves the original frequency in DE.
                 ld e,l
                 ld d,h
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_SH_JumpRatio: jr . + 2               ;Automodified by the line above to jump on the right code.
        .else
                 jp PLY_AKG_TempPlayInstrumentJumpInstrAndAddress        ;If ROM, jumps to the buffer, it will jump back just after according to the ratio.
@@ -4234,7 +4234,7 @@ PLY_AKG_Effect_ArpeggioTable:
         ld l,a
         ld h,#0x00
         add hl,hl
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_ArpeggiosTable: ld bc,#0x0000
        .else
         ld bc,(PLY_AKG_ArpeggiosTable)
@@ -4278,7 +4278,7 @@ PLY_AKG_Effect_PitchTable:
         ld l,a
         ld h,#0x00
         add hl,hl
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_PitchesTable: ld bc,#0x0000
        .else
         ld bc,(PLY_AKG_PitchesTable)
@@ -4416,7 +4416,7 @@ PLY_AKG_Effect_GlideWithNote:
         ;What is the difference?
         or a
         sbc hl,de
-       .if PLY_AKG_Rom
+       .ifeq PLY_AKG_Rom
 PLY_AKG_Effect_GlideWithNoteSaveDE: ld de,#0x0000                   ;Retrieves DE. This does not modified the Carry.
        .else
         ld de,(PLY_AKG_Effect_GlideWithNoteSaveDE)
@@ -4525,7 +4525,7 @@ PLY_AKG_Effect_ForcePitchSpeed:
         
 
                        .if PLY_CFG_UseEventTracks            ;CONFIG SPECIFIC
-                       .if PLY_AKG_Rom
+                       .ifeq PLY_AKG_Rom
 PLY_AKG_Event: .db 0         ;Possible event sent from the music for the caller to interpret.
                        .endif
                        .endif ;PLY_CFG_UseEventTracks

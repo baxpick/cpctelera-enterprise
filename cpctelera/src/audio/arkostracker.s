@@ -814,7 +814,7 @@ PLY_Track1_PlayNoForward:
 ;Send the registers to PSG. Various codes according to the machine used.
 PLY_SendRegisters:
 
- .if PLY_UseEnterprise
+ .ifeq PLY_UseEnterprise
 
    ;A=Register 7
 

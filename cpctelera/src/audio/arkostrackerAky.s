@@ -59,7 +59,7 @@ PLY_AKY_Start:
 .equ PLY_AKY_Offset1b  , 1
        .endif
 
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 .equ PLY_AKY_OPCODE_OR_A  , #0xb7                        ;Opcode for "or a".
 .equ PLY_AKY_OPCODE_SCF  , #0x37                         ;Opcode for "scf".
        .else
@@ -236,7 +236,7 @@ cpct_akpAKY_musicPlay_asm::   ;; Entry point for assembly calls
 ;       The interruption SHOULD be disabled (DI), as the stack is heavily used.
 PLY_AKY_PlayDisarkGenerateExternalLabel:
 PLY_AKY_Play:
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
         ld (PLY_AKY_Exit + 1),sp
        .else
         ld (PLY_AKY_SaveSp),sp
@@ -245,7 +245,7 @@ PLY_AKY_Play:
 
 ;Linker.
 ;----------------------------------------
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 
 PLY_AKY_PatternFrameCounter: ld hl,#0x01                ;How many frames left before reading the next Pattern.
        .else
@@ -257,7 +257,7 @@ PLY_AKY_PatternFrameCounter: ld hl,#0x01                ;How many frames left be
         jr z,PLY_AKY_PatternFrameCounter_Over
         ld (PLY_AKY_PatternFrameCounter + PLY_AKY_Offset1b),hl
         ;The pattern is not over.
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
         jr PLY_AKY_Channel1_WaitBeforeNextRegisterBlock
        .else
         jr PLY_AKY_Channel1_WaitBeforeNextRegisterBlock_Start
@@ -266,7 +266,7 @@ PLY_AKY_PatternFrameCounter: ld hl,#0x01                ;How many frames left be
 PLY_AKY_PatternFrameCounter_Over:
 
 ;The pattern is over. Reads the next one.
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 
 PLY_AKY_PtLinker: ld sp,#0x0000                                   ;Points on the Pattern of the linker.
        .else
@@ -310,7 +310,7 @@ _cpct_akpAKY_songLoopTimes:: .db 0
 ;Reading the Tracks.
 ;----------------------------------------
 
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 PLY_AKY_Channel1_WaitBeforeNextRegisterBlock: ld a,#0x01        ;Frames to wait before reading the next RegisterBlock. 0 = finished.
        .else
 PLY_AKY_Channel1_WaitBeforeNextRegisterBlock_Start:
@@ -323,7 +323,7 @@ PLY_AKY_Channel1_WaitBeforeNextRegisterBlock_Over:
         ;Obviously, starts at the initial state.
         ld a,#PLY_AKY_OPCODE_OR_A
         ld (PLY_AKY_Channel1_RegisterBlockLineState_Opcode),a
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 
 PLY_AKY_Channel1_PtTrack: ld sp,#0x0000                   ;Points on the Track.
        .else
@@ -342,7 +342,7 @@ PLY_AKY_Channel1_RegisterBlock_Process:
         ld (PLY_AKY_Channel1_WaitBeforeNextRegisterBlock + PLY_AKY_Offset1b),a
         
 
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 PLY_AKY_Channel2_WaitBeforeNextRegisterBlock: ld a,#0x01        ;Frames to wait before reading the next RegisterBlock. 0 = finished.
        .else
 PLY_AKY_Channel2_WaitBeforeNextRegisterBlock_Start:
@@ -355,7 +355,7 @@ PLY_AKY_Channel2_WaitBeforeNextRegisterBlock_Over:
         ;Obviously, starts at the initial state.
         ld a,#PLY_AKY_OPCODE_OR_A
         ld (PLY_AKY_Channel2_RegisterBlockLineState_Opcode),a
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 
 PLY_AKY_Channel2_PtTrack: ld sp,#0x0000                   ;Points on the Track.
        .else
@@ -373,7 +373,7 @@ PLY_AKY_Channel2_RegisterBlock_Process:
         ;Processes the RegisterBlock, whether it is the current one or a new one.
         ld (PLY_AKY_Channel2_WaitBeforeNextRegisterBlock + PLY_AKY_Offset1b),a
         
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 PLY_AKY_Channel3_WaitBeforeNextRegisterBlock: ld a,#0x01        ;Frames to wait before reading the next RegisterBlock. 0 = finished.
        .else
 PLY_AKY_Channel3_WaitBeforeNextRegisterBlock_Start:
@@ -386,7 +386,7 @@ PLY_AKY_Channel3_WaitBeforeNextRegisterBlock_Over:
         ;Obviously, starts at the initial state.
         ld a,#PLY_AKY_OPCODE_OR_A
         ld (PLY_AKY_Channel3_RegisterBlockLineState_Opcode),a
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 
 PLY_AKY_Channel3_PtTrack: ld sp,#0x0000                   ;Points on the Track.
        .else
@@ -439,14 +439,14 @@ PLY_AKY_Channel3_RegisterBlock_Process:
         ld sp,#PLY_AKY_RetTable_ReadRegisterBlock
        .endif
         ;Channel 1
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 
 PLY_AKY_Channel1_PtRegisterBlock: ld hl,#0x0000                   ;Points on the data of the RegisterBlock to read.
        .else
         ld hl,(PLY_AKY_Channel1_PtRegisterBlock)
        .endif
 
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 PLY_AKY_Channel1_RegisterBlockLineState_Opcode: or a        ;"or a" if initial state, "scf" (#37) if non-initial state.
        .else
         ld a,(PLY_AKY_Channel1_RegisterBlockLineState_Opcode)
@@ -468,14 +468,14 @@ PLY_AKY_Channel1_RegisterBlock_Return:
         srl b           ;Not RR, because we have to make sure the b6 is 0, else no more keyboard (on CPC)!
                         ;Also, on MSX, bit 6 must be 0.
 
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 
 PLY_AKY_Channel2_PtRegisterBlock: ld hl,#0x0000                   ;Points on the data of the RegisterBlock to read.
        .else
         ld hl,(PLY_AKY_Channel2_PtRegisterBlock)
        .endif
 
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 PLY_AKY_Channel2_RegisterBlockLineState_Opcode: or a        ;"or a" if initial state, "scf" (#37) if non-initial state.
        .else
         ld a,(PLY_AKY_Channel2_RegisterBlockLineState_Opcode)
@@ -501,14 +501,14 @@ PLY_AKY_Channel2_RegisterBlock_Return:
                 rr b            ;Safe to use RR, we don't care if b7 of R7 is 0 or 1.
        .endif
 
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 
 PLY_AKY_Channel3_PtRegisterBlock: ld hl,#0x0000                   ;Points on the data of the RegisterBlock to read.
        .else
         ld hl,(PLY_AKY_Channel3_PtRegisterBlock)
        .endif
 
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 PLY_AKY_Channel3_RegisterBlockLineState_Opcode: or a        ;"or a" if initial state, "scf" (#37) if non-initial state.
        .else
         ld a,(PLY_AKY_Channel3_RegisterBlockLineState_Opcode)
@@ -703,7 +703,7 @@ PLY_AKY_PsgRegister13_Code:
                 ld a,(PLY_AKY_PsgRegister13)
        .endif
         
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 PLY_AKY_PsgRegister13_Retrig: cp #0xff                         ;If IsRetrig?, force the R13 to be triggered.
        .else
                 cp b
@@ -752,7 +752,7 @@ PLY_AKY_PsgRegister13_End:
 
                        .endif ;PLY_CFG_UseHardwareSounds
 
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 
 PLY_AKY_Exit: ld sp,#0x0000
        .else
@@ -1806,7 +1806,7 @@ PLY_AKY_RRB_NIS_S_NOR_NoRetrig:
                        .endif ;PLY_CFG_UseHardwareSounds
 
 
-       .if PLY_AKY_ROM
+       .ifeq PLY_AKY_ROM
 ;Some stored PSG registers. They MUST be consecutive.
 PLY_AKY_PsgRegister6:   .db #0x00
                .if PLY_CFG_UseHardwareSounds
