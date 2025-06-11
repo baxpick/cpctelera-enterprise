@@ -12,7 +12,7 @@ envelopeInterrupt:
 
         push  hl
         push  bc
-envelopeInterrupt.l1:    ld    hl,#0x0000                 ; * envelope counter
+envelopeInterrupt.l1:    ld    hl,#0x0011                 ; * envelope counter
       .if ENABLE_1000HZ_IRQ
         ld    bc, #65536 - (((#62500 * #ENV_SRATE_DIV) + #500) / #1000)
       .else
@@ -191,6 +191,8 @@ setChannelAmplitude:
         cp    #0x10
         jr    c, setChannelAmplitude.l1
     .ifeq NO_ENVELOPE_IRQ
+;        ld      a,#0x38                     ; = JR C, +nn
+;        ld      (envelopeInterrupt.l2),a    ; enable envelope
         res   3, b
         ld    a, (envelopeInterrupt.l4 + 1)
     .else
@@ -418,8 +420,8 @@ ayReset.l1:    inc   hl
         ld    (hl), #0x3f
     .ifeq NO_ENVELOPE_IRQ
         ld    (envelopeInterrupt.l4 + 1), a
-        ld    a, #0x18                    ; = JR +nn
-        ld    (envelopeInterrupt.l2), a
+;        ld    a, #0x18                    ; = JR +nn
+;        ld    (envelopeInterrupt.l2), a
         ld    hl, #MIN_ENV_FREQVAL
         ld    (envelopeInterrupt.l3 + 1), hl
         ld    a, #<(envelopeInterrupt.l12 - envelopeInterrupt.l11)
