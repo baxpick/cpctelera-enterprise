@@ -1,0 +1,20 @@
+name: Dispatch enterprise-port-push event
+
+on:
+  push:
+    branches:
+      - enterprise-port
+
+jobs:
+  dispatch:
+    name: Dispatch to cpctelera_example repo so new docker image is built
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send repository dispatch to baxpick/cpctelera_example
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.REPO_DISPATCH_TOKEN }}
+          repository: baxpick/cpctelera_example
+          event-type: enterprise-port-push
+          client-payload: |
+            {"ref":"${{ github.ref }}","sha":"${{ github.sha }}","repository":"${{ github.repository }}"}
