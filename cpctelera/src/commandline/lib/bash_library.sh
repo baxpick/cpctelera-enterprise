@@ -60,6 +60,20 @@ function Error {
    echo "#########################"
    echo "##> ${COLOR_LIGHT_YELLOW}${1}${COLOR_NORMAL}"
    echo
+
+   echo "---- Build Log (start) ----"
+
+   local MY_LOG=$(find / -name 'tool_building.log' 2>/dev/null)
+   
+   if [ "${MY_LOG}" != "" ]; then
+     echo "Log found at: ${MY_LOG}"
+     cat "${MY_LOG}"
+   else
+     echo "Log file not found."
+   fi
+   
+   echo "---- Build Log (end) ----"
+   
    exit $2
 }
 
@@ -1034,16 +1048,7 @@ function makeWithProgressSupervision {
 
    ## Supervise the Making Process
    if ! superviseBackgroundProcess "$!" "$MAKELOG" "$LOGTOTALBYTES" "$PBARSIZE" "$CHECKDELAY"; then
-      #Error "${ERRORMSG}. Please, check '${MAKELOG}' for details. Aborting. " 123
-      echo "---- Build Log (start) ----"
-      local MY_LOG=$(find / -name 'tool_building.log' 2>/dev/null)
-      if [ "${MY_LOG}" != "" ]; then
-         echo "Log found at: ${MY_LOG}"
-         cat "${MY_LOG}"
-      else
-         echo "Log file not found."
-      fi
-      echo "---- Build Log (end) ----"
+      Error "${ERRORMSG}. Please, check '${MAKELOG}' for details. Aborting. " 123
    fi
    drawOK
 }
