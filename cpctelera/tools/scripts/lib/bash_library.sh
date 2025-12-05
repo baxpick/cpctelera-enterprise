@@ -1048,7 +1048,16 @@ function makeWithProgressSupervision {
 
    ## Supervise the Making Process
    if ! superviseBackgroundProcess "$!" "$MAKELOG" "$LOGTOTALBYTES" "$PBARSIZE" "$CHECKDELAY"; then
-      Error "${ERRORMSG}. Please, check '${MAKELOG}' for details. Aborting. " 123
+      #Error "${ERRORMSG}. Please, check '${MAKELOG}' for details. Aborting. " 123
+      echo "---- Build Log (start) ----"
+      local MY_LOG=$(find / -name 'tool_building.log' 2>/dev/null)
+      if [ "${MY_LOG}" != "" ]; then
+      echo "Log found at: ${MY_LOG}"
+      cat "${MY_LOG}"
+      else
+      echo "Log file not found."
+      fi
+      echo "---- Build Log (end) ----"
    fi
    drawOK
 }
