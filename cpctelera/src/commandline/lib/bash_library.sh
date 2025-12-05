@@ -60,9 +60,18 @@ function Error {
    echo "#########################"
    echo "##> ${COLOR_LIGHT_YELLOW}${1}${COLOR_NORMAL}"
    echo
-   
+
    echo "---- Build Log (start) ----"
-   cat /build/retro/projects/mytools/cpctelera-linux-enterprise/cpctelera/logs/tool_building.log
+
+   local MY_LOG=$(find / -name 'tool_building.log' 2>/dev/null)
+   
+   if [ "${MY_LOG}" != "" ]; then
+     echo "Log found at: ${MY_LOG}"
+     cat "${MY_LOG}"
+   else
+     echo "Log file not found."
+   fi
+   
    echo "---- Build Log (end) ----"
    
    exit $2
