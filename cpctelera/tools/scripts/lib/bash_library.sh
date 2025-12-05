@@ -60,11 +60,6 @@ function Error {
    echo "#########################"
    echo "##> ${COLOR_LIGHT_YELLOW}${1}${COLOR_NORMAL}"
    echo
-
-   echo "---- Build Log (start) ----"
-   cat /build/retro/projects/mytools/cpctelera-linux-enterprise/cpctelera/logs/tool_building.log
-   echo "---- Build Log (end) ----"
-
    exit $2
 }
 
